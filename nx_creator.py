@@ -42,14 +42,16 @@ class NX_Creator:
             md = {}
 
         group = h5parent.create_group(nm)
-        group.attrs['NX_class'] = NX_class
+        group.attrs["NX_class"] = NX_class
         return group, md
 
-    def add_process_group(self,
-            hdf5filename,
-            entrygroup="/entry",
-            nm=None,    # name of process group
-            md=None):
+    def add_process_group(
+        self,
+        hdf5filename,
+        entrygroup="/entry",
+        nm=None,  # name of process group
+        md=None,
+    ):
         """Add a new NXprocess group to an existing HDF5 file."""
         # TODO: will need to get and add data
         nxclass = "NXprocess"
@@ -57,10 +59,14 @@ class NX_Creator:
             with h5py.File(hdf5filename, "a") as root:
                 group = root[entrygroup]
                 if nm is None:
-                    nm = f"process_{1+self.count_subgroups(group, nxclass)}"
+                    nm = (
+                        f"process_{1+self.count_subgroups(group, nxclass)}"
+                    )
                 logger.debug(
                     "Adding NXprocess group '%s' to '%s' in file %s",
-                    nm, group.name, hdf5filename
+                    nm,
+                    group.name,
+                    hdf5filename,
                 )
                 self.create_process_group(group, nm, md=md)
 
@@ -107,7 +113,10 @@ class NX_Creator:
         group, md = self.__init_group__(h5parent, nm, "NXdetector", md)
 
         # TODO:
-        # data [npts, frame_size_x, frame_size_y]  = $n 2-dimensional diffraction patterns with $frame_size_x pixels in horizontal and $frame_size_y pixels in vertical direction. E.g. Eiger 1M → 10000 DP x 1028 pixel_x x 1062 pixel_y
+        # data [npts, frame_size_x, frame_size_y]  =
+        #   $n 2-dimensional diffraction patterns with $frame_size_x pixels
+        # in horizontal and $frame_size_y pixels in vertical direction.
+        # E.g. Eiger 1M → 10000 DP x 1028 pixel_x x 1062 pixel_y
         # X_pixel_size (NX_FLOAT) = horizontal pixel size of the detector
         #     @units (NX_LENGTH) = m
         # Y_pixel_size (NX_FLOAT) = vertical pixel size of the detector
@@ -133,17 +142,16 @@ class NX_Creator:
         experiment_description = md.get("experiment_description")
         if experiment_description is not None:
             group.create_dataset(
-                "experiment_description",
-                data=experiment_description
+                "experiment_description", data=experiment_description
             )
 
         title = md.get("title", "")
         ds = group.create_dataset("title", data=title)
-        ds.attrs["target"] = ds.name      # we'll re-use this
+        ds.attrs["target"] = ds.name  # we'll re-use this
         logger.debug("title: %s", title)
 
         # NeXus structure: point to this group for default plot
-        h5parent.attrs['default'] = group.name.split("/")[-1]
+        h5parent.attrs["default"] = group.name.split("/")[-1]
 
         self.create_instrument_group(group, md=md)
         self.create_data_group(group, "data", md=md)
@@ -154,11 +162,13 @@ class NX_Creator:
     def create_instrument_group(self, h5parent, md=None):
         """Write the NXinstrument group."""
         # TODO: will need to get and add data
-        group, md = self.__init_group__(h5parent, "instrument", "NXinstrument", md)
+        group, md = self.__init_group__(
+            h5parent, "instrument", "NXinstrument", md
+        )
 
         name_field = md.get("instrument", "")
         ds = group.create_dataset("name", data=name_field)
-        ds.attrs["target"] = ds.name      # we'll re-use this
+        ds.attrs["target"] = ds.name  # we'll re-use this
         logger.debug("instrument: %s", name_field)
 
         self.create_beam_group(group, "beam", md=md)
@@ -217,18 +227,20 @@ class NX_Creator:
         """optional header metadata"""
         if md is None:
             md = {}
-        timestamp = datetime.datetime.now().isoformat(sep=" ", timespec="seconds")
-        logger.debug('timestamp: %s', str(timestamp))
+        timestamp = datetime.datetime.now().isoformat(
+            sep=" ", timespec="seconds"
+        )
+        logger.debug("timestamp: %s", str(timestamp))
 
         # give the HDF5 root some more attributes
-        h5parent.attrs['file_name'] = h5parent.filename
-        h5parent.attrs['file_time'] = timestamp
+        h5parent.attrs["file_name"] = h5parent.filename
+        h5parent.attrs["file_time"] = timestamp
         instrument_name = md.get("instrument")
         if instrument_name is not None:
-            h5parent.attrs['instrument'] = instrument_name
-        h5parent.attrs['creator'] = __file__             # TODO: better choice?
-        h5parent.attrs['HDF5_Version'] = h5py.version.hdf5_version
-        h5parent.attrs['h5py_version'] = h5py.version.version
+            h5parent.attrs["instrument"] = instrument_name
+        h5parent.attrs["creator"] = __file__  # TODO: better choice?
+        h5parent.attrs["HDF5_Version"] = h5py.version.hdf5_version
+        h5parent.attrs["h5py_version"] = h5py.version.version
 
     def write_new_file(self, output_filename, md=None):
         """Write the complete NeXus file."""
