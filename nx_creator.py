@@ -34,7 +34,6 @@ class NX_Creator:
             entrygroup="/entry"
         )
 
-
     """
 
     def __init_group__(self, h5parent, nm, NX_class, md=None):
