@@ -15,6 +15,16 @@ import os
 
 logger = logging.getLogger(__name__)
 
+
+class NX_Creator:
+
+    def __init__(self, filename):
+        self.filename = filename
+        self.root = f5py.File(filename, "w")
+
+    def writer(self):
+        pass
+
 def write_file_header(h5parent):
     """optional header metadata"""
     timestamp = datetime.datetime.now().isoformat(sep=" ", timespec="seconds")
@@ -47,3 +57,8 @@ def create_entry_group(h5parent, md):
     h5parent.attrs['default'] = nxentry.name.split("/")[-1]
 
     return nxentry
+
+def create_instrument_group():
+    ...
+
+def
