@@ -4,15 +4,9 @@ import logging
 import os
 
 # TODO
-# [x] create header
-# [x] create entry group
-#   [x] create instrument group
-#       [x] create beam group
-#       [x] create detector group
-#       [x] create monitor groups
-#       [x] create positioner groups
-#   [x] create data group
-# [x] create process groups
+# [ ] load data (in loader module)
+# [ ] call this code (from toNXconverter module?)
+# [ ] put data into the tree
 
 logger = logging.getLogger(__name__)
 
