@@ -39,12 +39,25 @@ class NX_Creator:
         h5parent.attrs['h5py_version'] = h5py.version.version
 
     def __init_group__(self, h5parent, nm, NX_class, md=None):
+        """Common steps to initialize a NeXus HDF5 group."""
         if md is None:
             md = {}
 
         group = h5parent.create_group(nm)
         group.attrs['NX_class'] = NX_class
         return group, md
+
+    def count_subgroups(self, h5parent, nxclass):
+        """Count the number of subgroups of a specific NX_class."""
+        count = 0
+        for key in h5parent.keys():
+            obj = h5parent[key]
+            if not isinstance(obj, h5py.Group):
+                continue
+            nxclass = obj.attrs.get("NX_class")
+            if nxclass == "NXprocess":
+                count += 1
+        return count
 
     def create_entry_group(self, h5parent, md=None):
         """
@@ -98,49 +111,90 @@ class NX_Creator:
         """Write the NXbeam group."""
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXbeam", md)
-        # TODO: other fields?
+
+        # TODO:
+        # Either Energy or Wavelength : one of these is required
+        # Energy (NX_FLOAT)
+        #     @units (NX_ENERGY) = eV | keV | J
+        # Wavelength (NX_FLOAT)
+        #     @units (NX_WAVELENGTH) = A | nm
+        # Extent (NX_FLOAT) = Size of the beam at sample position
+        #     @units (NX_LENGTH) = m
+        # Polarization (NX_FLOAT) = polarization vector
+        #     @units ?
 
     def create_detector_group(self, h5parent, nm, md=None):
         """Write a NXdetector group."""
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXdetector", md)
-        # TODO: other fields?
+
+        # TODO:
+        # data [npts, frame_size_x, frame_size_y]  = $n 2-dimensional diffraction patterns with $frame_size_x pixels in horizontal and $frame_size_y pixels in vertical direction. E.g. Eiger 1M → 10000 DP x 1028 pixel_x x 1062 pixel_y
+        # X_pixel_size (NX_FLOAT) = horizontal pixel size of the detector
+        #     @units (NX_LENGTH) = m
+        # Y_pixel_size (NX_FLOAT) = vertical pixel size of the detector
+        #     @units (NX_LENGTH) = m
+        # Distance = Sample to detector distance
+        # @units (NX_LENGTH) = m
+        # Geometry (NXTransformation)
+
+        # AXISNAME (NX_NUMBER)
+        #     @transformation_type (NX_CHAR)
+        # @vector (NX_NUMBER)
 
     def create_monitor_group(self, h5parent, nm, md=None):
         """Write a NXmonitor group."""
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXmonitor", md)
-        # TODO: other fields?
+
+        # TODO:
+        # Data [npts] (NX_FLOAT)
+        #     @units (NX_ANY) = unit of the monitor data
 
     def create_positioner_group(self, h5parent, nm, md=None):
         """Write a NXpositioner group."""
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXpositioner", md)
-        # TODO: other fields?
+
+        # TODO:
+        # Name (NXchar) = define positioner name (stage axis?)
+        # Value [n] (NXnumber) = n position values for positioner 1
+        #     @unit (NX_ANY) = unit related to the positioner (angle or m)
+        # Raw_value
+        # target_value
 
     def create_data_group(self, h5parent, nm, md=None):
         """Write a NXdata group."""
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXdata", md)
-        # TODO: other fields?
+
+        # TODO:
+        # describes the plottable data and related dimension scales
+        # items here could be HDF5 datasets or links to datasets
 
     def create_process_group(self, h5parent, nm, md=None):
         """Write a NXprocess group."""
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXprocess", md)
-        # TODO: other fields?
 
-    def count_subgroups(self, h5parent, nxclass):
-        """Count the number of subgroups of a specific NX_class."""
-        count = 0
-        for key in h5parent.keys():
-            obj = h5parent[key]
-            if not isinstance(obj, h5py.Group):
-                continue
-            nxclass = obj.attrs.get("NX_class")
-            if nxclass == "NXprocess":
-                count += 1
-        return count
+        # TODO:
+
+    def create_sample_group(self, h5parent, nm, md=None):
+        """Write a NXsample group."""
+        # TODO: will need to get and add data
+        group, md = self.__init_group__(h5parent, nm, "NXsample", md)
+
+        # TODO:
+        # Name (NX_CHAR) = name of the sample
+        # Transformation (NXtransformations) =
+        #   must contain two fields with the x and y
+        #   positioners that are linked via the
+        #   dependency tree according to the real-life
+        #   positioner layout dependency. For raster
+        #   scans, x and y will have shape (npts_x, npts_y).
+        #   For arbitrary scans x and y will be (npts_x*npts_y,),
+        #   An attribute with the units for each positioner
+        #   is required.
 
     def add_process_group(self, hdf5filename, entrygroup="/entry", nm=None, md=None):
         """Add a new NXprocess group to an existing HDF5 file."""
