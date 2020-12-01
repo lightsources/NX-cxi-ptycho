@@ -62,3 +62,7 @@ nosetests.xml
 # Microsoft VS Code #
 #####################
 .vscode/
+
+# local #
+################
+example*.nx
