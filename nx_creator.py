@@ -7,6 +7,7 @@ import os
 # [ ] load data (in loader module)
 # [ ] call this code (from toNXconverter module?)
 # [ ] put data into the tree
+# [ ] add option for user input on execution
 
 logger = logging.getLogger(__name__)
 

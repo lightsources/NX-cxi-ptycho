@@ -7,8 +7,8 @@ Conversion from any (supported) ptycho file to NXcxi_ptycho.
 import logging
 import sys
 
-# TODO: import loader
 import nx_creator
+import loaders
 
 
 def get_user_parameters():
@@ -56,6 +56,7 @@ def main():
     logger = logging.getLogger(__name__)
 
     # TODO: call the loader
+    load_cxi = loaders.cxiLoader()
     # TODO: Need real ptycho data
 
     # FIXME: these are examples for demo purposes only

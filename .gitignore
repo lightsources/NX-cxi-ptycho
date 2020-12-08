@@ -66,3 +66,4 @@ nosetests.xml
 # local #
 ################
 example*.nx
+.idea
