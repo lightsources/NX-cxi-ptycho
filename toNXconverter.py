@@ -36,6 +36,13 @@ def get_user_parameters():
         version="development version",
     )
 
+    #TODO check if this input makes sense
+    parser.add_argument(
+        "Input_file",
+        action="store",
+        help="NXcxi_ptycho (input) data file name",
+    )
+
     parser.add_argument(
         "NeXus_file",
         action="store",
@@ -48,6 +55,7 @@ def get_user_parameters():
 def main():
     options = get_user_parameters()
     output_filename = options.NeXus_file
+    input_filename = options.Input_file
 
     choices = "WARNING INFO DEBUG".split()
     logLevel = min(max(0, options.verbose), len(choices) - 1)
@@ -55,18 +63,26 @@ def main():
     logging.basicConfig(level=choices[logLevel])
     logger = logging.getLogger(__name__)
 
-    # TODO: call the loader
-    load_cxi = loaders.cxiLoader()
+    # TODO: have options to call different loaders based on file suffix
+    load_data = loaders.cxiLoader()
+    load_data.get_data(input_filename)
     # TODO: Need real ptycho data
 
     # FIXME: these are examples for demo purposes only
     # FIXME: writer does not know what data to write now
     metadata = dict(
         # used in header and NXinstrument
-        instrument="ptycho demo",
+        instrument=load_data.source_name,
         # used in NXentry
         title="The first NX ptycho file demo",
         experiment_description="simple",
+        
+        energy=load_data.energy,
+        x_pixel_size = load_data.x_pixel_size,
+        y_pixel_size = load_data.y_pixel_size,
+        distance = load_data.distance,
+        data = load_data.data,
+
         # not used anywhere
         other="some other metadata that will be ignored",
     )

@@ -5,16 +5,17 @@ import dask
 
 class GeneralLoader():
     def __init__(self):
-        # Loading the Data
         self.source_name = None
         self.energy = None
         self.x_pixel_size = None
         self.y_pixel_size = None
         self.distance = None
         self.translation = None
+        self.data = None
         self.data_avg = None
 
     def get_data(self, path):
+        # Loading the Data
         self.file = h5py.File(path, 'r')
         self.source_name = self.file[self.source_name_key]
         self.energy = self.file[self.energy_key]
@@ -22,6 +23,7 @@ class GeneralLoader():
         self.y_pixel_size = self.file[self.y_pixel_size_key]
         self.distance = self.file[self.distance_key]
         self.translation = self.file[self.translation_key]
+        self.data = self.file[self.data_key]
         # self.data_avg = self.file[self.data_avg_key]
 
 
