@@ -1,5 +1,9 @@
 # TODO
-# create loaders/parser for different ptycho input files at the different beamlines/facilities
+# [ ] create loaders/parser for different ptycho input files at the different beamlines/facilities
+# [ ] test class to check which loader is appropriate
+# [ ] using projections to get keys
+# [ ] future work to make converter multi-directional using projection
+
 import h5py
 import dask
 
@@ -17,13 +21,13 @@ class GeneralLoader():
     def get_data(self, path):
         # Loading the Data
         self.file = h5py.File(path, 'r')
-        self.source_name = self.file[self.source_name_key]
-        self.energy = self.file[self.energy_key]
-        self.x_pixel_size = self.file[self.x_pixel_size_key]
-        self.y_pixel_size = self.file[self.y_pixel_size_key]
-        self.distance = self.file[self.distance_key]
-        self.translation = self.file[self.translation_key]
-        self.data = self.file[self.data_key]
+        self.source_name = self.file[self.source_name_key][()]
+        self.energy = self.file[self.energy_key][()]
+        self.x_pixel_size = self.file[self.x_pixel_size_key][()]
+        self.y_pixel_size = self.file[self.y_pixel_size_key][()]
+        self.distance = self.file[self.distance_key][()]
+        self.translation = self.file[self.translation_key][()]
+        self.data = self.file[self.data_key][()]
         # self.data_avg = self.file[self.data_avg_key]
 
 

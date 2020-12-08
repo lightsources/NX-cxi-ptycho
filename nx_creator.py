@@ -4,10 +4,13 @@ import logging
 import os
 
 # TODO
-# [ ] load data (in loader module)
-# [ ] call this code (from toNXconverter module?)
-# [ ] put data into the tree
-# [ ] add option for user input on execution
+# [x] load data (in loader module)
+# [x] call this code (from toNXconverter module?)
+
+# [-] put data into the tree
+# [-] add option for user input on execution
+# [ ] option to add multiple dataset to multiple entrys
+# [ ] positioner names and get data using map/zip of data array --> think of best ways to load these
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +93,10 @@ class NX_Creator:
 
         # TODO:
         # Either Energy or Wavelength : one of these is required
+        ds = group.create_dataset("energy", data=md["energy"])
+        ds.attrs["units"] = "J" #FIXME allow for other units
+        ds.attrs["target"] = ds.name
+
         # Energy (NX_FLOAT)
         #     @units (NX_ENERGY) = eV | keV | J
         # Wavelength (NX_FLOAT)
@@ -113,7 +120,21 @@ class NX_Creator:
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXdetector", md)
 
-        # TODO:
+        ds = group.create_dataset("data", data=md["data"])
+        # ds.attrs["units"] = "m"  # FIXME allow for other units
+        ds.attrs["target"] = ds.name
+
+        ds = group.create_dataset("distance", data=md["distance"])
+        ds.attrs["units"] = "m"  # FIXME allow for other units
+        ds.attrs["target"] = ds.name
+
+        ds = group.create_dataset("x_pixel_size", data=md["x_pixel_size"])
+        ds.attrs["units"] = "m" #FIXME allow for other units
+        ds.attrs["target"] = ds.name
+
+        ds = group.create_dataset("y_pixel_size", data=md["y_pixel_size"])
+        ds.attrs["units"] = "m"  # FIXME allow for other units
+        ds.attrs["target"] = ds.name
         # data [npts, frame_size_x, frame_size_y]  =
         #   $n 2-dimensional diffraction patterns with $frame_size_x pixels
         # in horizontal and $frame_size_y pixels in vertical direction.
@@ -174,7 +195,8 @@ class NX_Creator:
 
         self.create_beam_group(group, "beam", md=md)
         self.create_detector_group(group, "detector1", md=md)
-        self.create_detector_group(group, "detector2", md=md)
+        #TODO allow to add different detector group data
+        # self.create_detector_group(group, "detector2", md=md)
         self.create_monitor_group(group, "monitor", md=md)
         self.create_positioner_group(group, "positioner1", md=md)
         self.create_positioner_group(group, "positioner2", md=md)

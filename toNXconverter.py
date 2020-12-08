@@ -76,7 +76,7 @@ def main():
         # used in NXentry
         title="The first NX ptycho file demo",
         experiment_description="simple",
-        
+
         energy=load_data.energy,
         x_pixel_size = load_data.x_pixel_size,
         y_pixel_size = load_data.y_pixel_size,
