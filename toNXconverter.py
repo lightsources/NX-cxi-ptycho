@@ -66,10 +66,7 @@ def main():
     # TODO: have options to call different loaders based on file suffix
     load_data = loaders.cxiLoader()
     load_data.get_data(input_filename)
-    # TODO: Need real ptycho data
 
-    # FIXME: these are examples for demo purposes only
-    # FIXME: writer does not know what data to write now
     metadata = dict(
         # used in header and NXinstrument
         instrument=load_data.source_name,
@@ -78,17 +75,20 @@ def main():
         experiment_description="simple",
 
         energy=load_data.energy,
-        x_pixel_size = load_data.x_pixel_size,
-        y_pixel_size = load_data.y_pixel_size,
-        distance = load_data.distance,
-        data = load_data.data,
+        x_pixel_size=load_data.x_pixel_size,
+        y_pixel_size=load_data.y_pixel_size,
+        distance=load_data.distance,
+        data=load_data.data,
+        #FIXME accommodate different translation input variants
+        translation = load_data.translation,
 
         # not used anywhere
-        other="some other metadata that will be ignored",
+        other="some other metadata that will be ignored"
     )
 
     # write the data to a NeXus file
     creator = nx_creator.NX_Creator()
+    # print("METADATA dict: {}".format(metadata))
     creator.write_new_file(output_filename, md=metadata)
     logger.info("Wrote HDF5 file: %s", output_filename)
 

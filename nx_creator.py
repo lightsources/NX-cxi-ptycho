@@ -10,7 +10,7 @@ import os
 # [-] put data into the tree
 # [-] add option for user input on execution
 # [ ] option to add multiple dataset to multiple entries
-# [ ] positioner names and get data using map/zip of data array --> think of best ways to load these
+# [-] positioner names and get data using map/zip of data array --> think of best ways to load these
 
 logger = logging.getLogger(__name__)
 
@@ -91,8 +91,7 @@ class NX_Creator:
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXbeam", md)
 
-        # TODO:
-        # Either Energy or Wavelength : one of these is required
+        # TODO: Either Energy or Wavelength : one of these is required
         ds = group.create_dataset("energy", data=md["energy"])
         ds.attrs["units"] = "J" #FIXME allow for other units
         ds.attrs["target"] = ds.name
@@ -121,7 +120,7 @@ class NX_Creator:
         group, md = self.__init_group__(h5parent, nm, "NXdetector", md)
 
         ds = group.create_dataset("data", data=md["data"])
-        # ds.attrs["units"] = "m"  # FIXME allow for other units
+        ds.attrs["units"] = "m"  # FIXME allow for other units
         ds.attrs["target"] = ds.name
 
         ds = group.create_dataset("distance", data=md["distance"])
@@ -198,8 +197,9 @@ class NX_Creator:
         #TODO allow to add different detector group data
         # self.create_detector_group(group, "detector2", md=md)
         self.create_monitor_group(group, "monitor", md=md)
-        self.create_positioner_group(group, "positioner1", md=md)
-        self.create_positioner_group(group, "positioner2", md=md)
+        for n in range(md["translation"].shape[1]):
+            self.create_positioner_group(group, "positioner_{}".format(n+1), count=n, md=md)
+
 
     def create_monitor_group(self, h5parent, nm, md=None):
         """Write a NXmonitor group."""
@@ -210,12 +210,19 @@ class NX_Creator:
         # Data [npts] (NX_FLOAT)
         #     @units (NX_ANY) = unit of the monitor data
 
-    def create_positioner_group(self, h5parent, nm, md=None):
+    def create_positioner_group(self, h5parent, nm, count, md=None):
         """Write a NXpositioner group."""
-        # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXpositioner", md)
 
-        # TODO:
+        ds = group.create_dataset("value", data=md["translation"][:,count])
+        ds.attrs["units"] = "m" #FIXME allow for other units
+        ds.attrs["target"] = ds.name
+        # ds = group.create_dataset("positioner_2", data=md["positioner_2"])
+        # ds.attrs["units"] = "m" #FIXME allow for other units
+        # ds.attrs["target"] = ds.name
+        # ds = group.create_dataset("positioner_3", data=md["positioner_3"])
+        # ds.attrs["units"] = "m" #FIXME allow for other units
+        # ds.attrs["target"] = ds.name
         # Name (NXchar) = define positioner name (stage axis?)
         # Value [n] (NXnumber) = n position values for positioner 1
         #     @unit (NX_ANY) = unit related to the positioner (angle or m)
