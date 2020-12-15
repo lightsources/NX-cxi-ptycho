@@ -9,7 +9,7 @@ import os
 
 # [-] put data into the tree
 # [-] add option for user input on execution
-# [ ] option to add multiple dataset to multiple entrys
+# [ ] option to add multiple dataset to multiple entries
 # [ ] positioner names and get data using map/zip of data array --> think of best ways to load these
 
 logger = logging.getLogger(__name__)
