@@ -55,14 +55,14 @@ class cxiLoader(GeneralLoader):
         ### Data (plottable data?) fields
         self.data_key = 'data_1/data'
 
-        self.source_name = None
-        self.energy = None
-        self.x_pixel_size = None
-        self.y_pixel_size = None
-        self.distance = None
-        self.translation = None
-        self.data = None
-        self.data_avg = None
+        self.source_name = {}
+        self.energy = {}
+        self.x_pixel_size = {}
+        self.y_pixel_size = {}
+        self.distance = {}
+        self.translation = {}
+        self.data = {}
+        self.data_avg = {}
 
 
     def get_data(self, path):
@@ -72,13 +72,14 @@ class cxiLoader(GeneralLoader):
         print('Number of entries:', self.number_of_entries)
         #TODO iterate through entries
         for n in range(self.number_of_entries):
-            self.source_name = self.file['entry_{}/{}'.format(self.number_of_entries, self.source_name_key)][()]
-            self.energy = self.file['entry_{}/{}'.format(self.number_of_entries, self.energy_key)][()]
-            self.x_pixel_size = self.file['entry_{}/{}'.format(self.number_of_entries, self.x_pixel_size_key)][()]
-            self.y_pixel_size = self.file['entry_{}/{}'.format(self.number_of_entries, self.y_pixel_size_key)][()]
-            self.distance = self.file['entry_{}/{}'.format(self.number_of_entries, self.distance_key)][()]
-            self.translation = self.file['entry_{}/{}'.format(self.number_of_entries, self.translation_key)][()]
-            self.data = self.file['entry_{}/{}'.format(self.number_of_entries, self.data_key)][()]
+            print('entry_', n+1)
+            self.source_name['entry_{}'.format(n+1)] = str(self.file['entry_{}/{}'.format(n+1, self.source_name_key)][()])
+            self.energy['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.energy_key)][()]
+            self.x_pixel_size['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.x_pixel_size_key)][()]
+            self.y_pixel_size['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.y_pixel_size_key)][()]
+            self.distance['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.distance_key)][()]
+            self.translation['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.translation_key)][()]
+            self.data['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.data_key)][()]
         # self.data_avg = self.file[self.data_avg_key]
 
 
