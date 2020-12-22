@@ -80,7 +80,7 @@ def main():
         distance=load_data.distance,
         data=load_data.data,
         #FIXME accommodate different translation input variants
-        translation = load_data.translation,
+        translation=load_data.translation,
 
         # not used anywhere
         other="some other metadata that will be ignored"

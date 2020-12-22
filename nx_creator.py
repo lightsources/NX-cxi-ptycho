@@ -92,12 +92,11 @@ class NX_Creator:
         group, md = self.__init_group__(h5parent, nm, "NXbeam", md)
 
         # TODO: Either Energy or Wavelength : one of these is required
-        ds = group.create_dataset("energy", data=md["energy"])
-        ds.attrs["units"] = "J" #FIXME allow for other units
+        ds = group.create_dataset("energy", data=md["energy"]['entry_1'])
+        ds.attrs["units"] = "J" #FIXME allow for other units eV | keV | J
         ds.attrs["target"] = ds.name
 
-        # Energy (NX_FLOAT)
-        #     @units (NX_ENERGY) = eV | keV | J
+        #TODO add
         # Wavelength (NX_FLOAT)
         #     @units (NX_WAVELENGTH) = A | nm
         # Extent (NX_FLOAT) = Size of the beam at sample position
@@ -119,44 +118,37 @@ class NX_Creator:
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXdetector", md)
 
-        ds = group.create_dataset("data", data=md["data"])
+        ds = group.create_dataset("data", data=md["data"]['entry_1'])
+        ds.attrs["units"] = "counts"  # FIXME allow for other units
+        ds.attrs["target"] = ds.name
+
+        ds = group.create_dataset("distance", data=md["distance"]['entry_1'])
         ds.attrs["units"] = "m"  # FIXME allow for other units
         ds.attrs["target"] = ds.name
 
-        ds = group.create_dataset("distance", data=md["distance"])
-        ds.attrs["units"] = "m"  # FIXME allow for other units
-        ds.attrs["target"] = ds.name
-
-        ds = group.create_dataset("x_pixel_size", data=md["x_pixel_size"])
+        ds = group.create_dataset("x_pixel_size", data=md["x_pixel_size"]['entry_1'])
         ds.attrs["units"] = "m" #FIXME allow for other units
         ds.attrs["target"] = ds.name
 
-        ds = group.create_dataset("y_pixel_size", data=md["y_pixel_size"])
+        ds = group.create_dataset("y_pixel_size", data=md["y_pixel_size"]['entry_1'])
         ds.attrs["units"] = "m"  # FIXME allow for other units
         ds.attrs["target"] = ds.name
-        # data [npts, frame_size_x, frame_size_y]  =
-        #   $n 2-dimensional diffraction patterns with $frame_size_x pixels
-        # in horizontal and $frame_size_y pixels in vertical direction.
-        # E.g. Eiger 1M → 10000 DP x 1028 pixel_x x 1062 pixel_y
-        # X_pixel_size (NX_FLOAT) = horizontal pixel size of the detector
-        #     @units (NX_LENGTH) = m
-        # Y_pixel_size (NX_FLOAT) = vertical pixel size of the detector
-        #     @units (NX_LENGTH) = m
-        # Distance = Sample to detector distance
-        # @units (NX_LENGTH) = m
-        # Geometry (NXTransformation)
 
+        # TODO Geometry (NXTransformation)
         # AXISNAME (NX_NUMBER)
-        #     @transformation_type (NX_CHAR)
+        # @transformation_type (NX_CHAR)
         # @vector (NX_NUMBER)
 
-    def create_entry_group(self, h5parent, md=None):
+    def create_entry_group(self, h5parent, md=None, count_entry=None):
         """
         all information about the measurement
 
         see: https://manual.nexusformat.org/classes/base_classes/NXentry.html
         """
-        group, md = self.__init_group__(h5parent, "entry", "NXentry", md)
+        #FIXME allow to create multiple entry groups
+        group, md = self.__init_group__(h5parent, "entry_{}".format(count_entry),
+                                        "NXentry", md)
+        #print('group', group, 'md', md)
 
         group.create_dataset("definition", data="NXcxi_ptycho")
 
@@ -174,31 +166,31 @@ class NX_Creator:
         # NeXus structure: point to this group for default plot
         h5parent.attrs["default"] = group.name.split("/")[-1]
 
-        self.create_instrument_group(group, md=md)
+        self.create_instrument_group(group, md=md, count_entry=count_entry)
         self.create_data_group(group, "data", md=md)
-        self.create_process_group(group, "process1", md=md)
+        self.create_process_group(group, "process_1", md=md)
 
         return group
 
-    def create_instrument_group(self, h5parent, md=None):
+    def create_instrument_group(self, h5parent, md=None, count_entry=None):
         """Write the NXinstrument group."""
         # TODO: will need to get and add data
         group, md = self.__init_group__(
             h5parent, "instrument", "NXinstrument", md
         )
 
-        name_field = md.get("instrument", "")
+        name_field = md.get("instrument", "")['entry_{}'.format(count_entry)]
         ds = group.create_dataset("name", data=name_field)
         ds.attrs["target"] = ds.name  # we'll re-use this
         logger.debug("instrument: %s", name_field)
 
         self.create_beam_group(group, "beam", md=md)
-        self.create_detector_group(group, "detector1", md=md)
+        self.create_detector_group(group, "detector_1", md=md)
         #TODO allow to add different detector group data
-        # self.create_detector_group(group, "detector2", md=md)
+        # self.create_detector_group(group, "detector_2", md=md)
         self.create_monitor_group(group, "monitor", md=md)
-        for n in range(md["translation"].shape[1]):
-            self.create_positioner_group(group, "positioner_{}".format(n+1), count=n, md=md)
+        for n in range(md["translation"]['entry_{}'.format(count_entry)].shape[1]):
+            self.create_positioner_group(group, "positioner_{}".format(n+1), count_entry=count_entry, count=n, md=md)
 
 
     def create_monitor_group(self, h5parent, nm, md=None):
@@ -210,11 +202,11 @@ class NX_Creator:
         # Data [npts] (NX_FLOAT)
         #     @units (NX_ANY) = unit of the monitor data
 
-    def create_positioner_group(self, h5parent, nm, count, md=None):
+    def create_positioner_group(self, h5parent, nm, count_entry, count, md=None):
         """Write a NXpositioner group."""
         group, md = self.__init_group__(h5parent, nm, "NXpositioner", md)
 
-        ds = group.create_dataset("value", data=md["translation"][:,count])
+        ds = group.create_dataset("value", data=md["translation"]['entry_{}'.format(count_entry)][:,count])
         ds.attrs["units"] = "m" #FIXME allow for other units
         ds.attrs["target"] = ds.name
         # ds = group.create_dataset("positioner_2", data=md["positioner_2"])
@@ -265,7 +257,7 @@ class NX_Creator:
         # give the HDF5 root some more attributes
         h5parent.attrs["file_name"] = h5parent.filename
         h5parent.attrs["file_time"] = timestamp
-        instrument_name = md.get("instrument")
+        instrument_name = md.get("instrument")['entry_1']
         if instrument_name is not None:
             h5parent.attrs["instrument"] = instrument_name
         h5parent.attrs["creator"] = __file__  # TODO: better choice?
@@ -278,4 +270,6 @@ class NX_Creator:
             md = {}
         with h5py.File(output_filename, "w") as root:
             self.write_file_header(root, md=md)
-            self.create_entry_group(root, md=md)
+            for entry in range(len(md['energy'])):
+                self.create_entry_group(root, md=md, count_entry=entry+1)
+        root.close()

@@ -3,6 +3,10 @@
 # [ ] test class to check which loader is appropriate
 # [ ] using projections to get keys
 # [ ] future work to make converter multi-directional using projection
+# FIXME
+# [ ] load memory efficient
+# [ ] fix classes
+# [ ] write tests
 
 import h5py
 import dask
@@ -18,18 +22,18 @@ class GeneralLoader():
         self.data = None
         self.data_avg = None
 
-    def get_data(self, path):
-        # Loading the Data
-        self.file = h5py.File(path, 'r')
-        number_of_entries = len([entry for entry in self.file.keys() if 'entry' in entry])
-        print(number_of_entries)
-        self.source_name = self.file['entry_{}/{}'.format(number_of_entries, self.source_name_key)][()]
-        self.energy = self.file[self.energy_key][()]
-        self.x_pixel_size = self.file[self.x_pixel_size_key][()]
-        self.y_pixel_size = self.file[self.y_pixel_size_key][()]
-        self.distance = self.file[self.distance_key][()]
-        self.translation = self.file[self.translation_key][()]
-        self.data = self.file[self.data_key][()]
+    # def get_data(self, path):
+    #     # Loading the Data
+    #     self.file = h5py.File(path, 'r')
+    #     number_of_entries = len([entry for entry in self.file.keys() if 'entry' in entry])
+    #     print(number_of_entries)
+    #     self.source_name = self.file['entry_{}/{}'.format(number_of_entries, self.source_name_key)][()]
+    #     self.energy = self.file[self.energy_key][()]
+    #     self.x_pixel_size = self.file[self.x_pixel_size_key][()]
+    #     self.y_pixel_size = self.file[self.y_pixel_size_key][()]
+    #     self.distance = self.file[self.distance_key][()]
+    #     self.translation = self.file[self.translation_key][()]
+    #     self.data = self.file[self.data_key][()]
 
 
 
