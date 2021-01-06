@@ -73,7 +73,14 @@ class cxiLoader():
 
 
     def get_data(self, path):
-        # Loading the Data
+        """
+        Loading the data.
+        Note: Original hierarchy is e.g. entry_1/instrument_1/energy/
+        for the NX conversion this will be swapped so that NX groups like instrument_group
+        or detector_group etc move to the top level in the dictionary and then contain the given number of entries
+        for each NX field
+
+        """
         self.file = h5py.File(path, 'r')
         self.number_of_entries = len([entry for entry in self.file.keys() if 'entry' in entry])
         print('Total number of entries:', self.number_of_entries)
