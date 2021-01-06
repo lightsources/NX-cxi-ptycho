@@ -13,6 +13,7 @@ import dask
 
 class GeneralLoader():
     def __init__(self):
+        #TODO load dict with key for each field
         self.source_name = None
         self.energy = None
         self.x_pixel_size = None
@@ -37,9 +38,11 @@ class GeneralLoader():
 
 
 
-class cxiLoader(GeneralLoader):
+class cxiLoader():
 
     def __init__(self):
+        # TODO create key dictionary --> to be passed in GeneralLoader
+        # key_dict =
         super(cxiLoader, self).__init__()
         ### Defining the Keys
         # self.entry_key = 'entry_1'
@@ -73,17 +76,17 @@ class cxiLoader(GeneralLoader):
         # Loading the Data
         self.file = h5py.File(path, 'r')
         self.number_of_entries = len([entry for entry in self.file.keys() if 'entry' in entry])
-        print('Number of entries:', self.number_of_entries)
-        #TODO iterate through entries
-        for n in range(self.number_of_entries):
-            print('entry_', n+1)
-            self.source_name['entry_{}'.format(n+1)] = str(self.file['entry_{}/{}'.format(n+1, self.source_name_key)][()])
-            self.energy['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.energy_key)][()]
-            self.x_pixel_size['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.x_pixel_size_key)][()]
-            self.y_pixel_size['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.y_pixel_size_key)][()]
-            self.distance['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.distance_key)][()]
-            self.translation['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.translation_key)][()]
-            self.data['entry_{}'.format(n+1)] = self.file['entry_{}/{}'.format(n+1, self.data_key)][()]
-        # self.data_avg = self.file[self.data_avg_key]
+        print('Total number of entries:', self.number_of_entries)
+        for n in range(1, self.number_of_entries+1):
+            print(f'processing entry_{n}')
+            self.source_name[f'entry_{n}'] = self.set_file_key(self.file, n, self.source_name_key)
+            self.energy[f'entry_{n}'] = self.set_file_key(self.file, n, self.energy_key)
+            self.x_pixel_size[f'entry_{n}'] = self.set_file_key(self.file, n, self.x_pixel_size_key)
+            self.y_pixel_size[f'entry_{n}'] = self.set_file_key(self.file, n, self.y_pixel_size_key)
+            self.distance[f'entry_{n}'] = self.set_file_key(self.file, n, self.distance_key)
+            self.translation[f'entry_{n}'] = self.set_file_key(self.file, n, self.translation_key)
+            self.data[f'entry_{n}'] = self.set_file_key(self.file, n, self.data_key)
 
+    def set_file_key(self, file, n, key):
+        return file[f'entry_{n}/{key}']
 
