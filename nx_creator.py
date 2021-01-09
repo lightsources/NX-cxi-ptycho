@@ -266,6 +266,7 @@ class NX_Creator:
             md = {}
         with h5py.File(output_filename, "w") as root:
             self.write_file_header(root, md=md)
-            for entry in range(len(md['energy'])):
-                self.create_entry_group(root, md=md, count_entry=entry+1)
+            for entry in range(1, len(md['energy'])+1):
+                print(f'writing entry_{entry}')
+                self.create_entry_group(root, md=md, count_entry=entry)
         root.close()

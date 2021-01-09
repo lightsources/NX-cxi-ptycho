@@ -64,16 +64,18 @@ def main():
     logger = logging.getLogger(__name__)
 
     # TODO: have options to call different loaders based on file suffix
-    load_data = loaders.cxiLoader()
-    load_data.get_data(input_filename)
+    #load_data = loaders.cxiLoader()
+    load_data = loaders.GeneralLoader(input_filename)
+    load_data.get_data()
 
+    ### create dictionary containing the NX groups and fields
     metadata = dict(
         # used in header and NXinstrument
         instrument=load_data.source_name,
         # used in NXentry
         title="The first NX ptycho file demo",
         experiment_description="simple",
-
+        # NX fields
         energy=load_data.energy,
         x_pixel_size=load_data.x_pixel_size,
         y_pixel_size=load_data.y_pixel_size,
