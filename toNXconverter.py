@@ -67,6 +67,7 @@ def main():
     #load_data = loaders.cxiLoader()
     load_data = loaders.GeneralLoader(input_filename)
     load_data.get_data()
+    number_of_entries =  load_data.number_of_entries
 
     ### create dictionary containing the NX groups and fields
     metadata = dict(
@@ -91,7 +92,7 @@ def main():
     # write the data to a NeXus file
     creator = nx_creator.NX_Creator()
     # print("METADATA dict: {}".format(metadata))
-    creator.write_new_file(output_filename, md=metadata)
+    creator.write_new_file(output_filename, number_of_entries=number_of_entries, md=metadata)
     logger.info("Wrote HDF5 file: %s", output_filename)
 
 

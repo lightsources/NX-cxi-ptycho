@@ -4,24 +4,14 @@
 # [ ] using projections to get keys
 # [ ] future work to make converter multi-directional using projection
 # [ ] write tests
+# [ ] what to do if certain fields are missing in the original file? --> still writing the rest if essentials
+#     are covered, but warning/info what is missing, red flag warning, when essentials are missing
 # FIXME
 # [ ] load memory efficient
 # [-] fix classes --> load dictionary to GeneralLoader
 
 import h5py
 import dask
-
-class TestInputFormat():
-    """
-    Test class to check which loader is suitable for input file format
-    """
-    def __init__(self, path):
-        self.path = path
-
-    def check_suffix(self):
-        if self.path.endswith('.cxi'):
-            loader = cxiLoader()
-
 
 
 #see https://goodcode.io/articles/python-dict-object/ for passing key_dict to class
@@ -41,6 +31,7 @@ class GeneralLoader():
         self.data_avg = {}
         self.path = path
         self.key_dict = self.check_suffix(self.path).key_dict
+        self.number_of_entries = None
 
     def check_suffix(self, path):
         if path.endswith('.cxi'):
