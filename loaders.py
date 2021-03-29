@@ -39,6 +39,8 @@ class GeneralLoader():
             return cxiLoader()
         elif path.endswith('hdf'):
             print('hdf converter not yet implemented')
+        elif path.endswith('ptyd'):
+            print('ptyd converter not yet implemented')
         #TODO add more checks
 
     def get_data(self, mode='single'):
@@ -72,9 +74,9 @@ class GeneralLoader():
 
 class cxiLoader():
     """
-    Class to load cxi file for conversion t NXcxi_ptycho
-    init a dictionary containing the path structure of the cxi file that should be converted
-    further special methods for extracting data special to cxi can be added later
+    Class to load cxi file for conversion to NXcxi_ptycho
+    - init a dictionary containing the path structure of the cxi file that should be converted
+    - optional: add further special methods for extracting data special to cxi
     """
     def __init__(self):
         # TODO create key dictionary --> to be passed in GeneralLoader
@@ -98,4 +100,8 @@ class cxiLoader():
 
 
 class HDF_loader():
+    ...
+
+
+class ptyd_loader():
     ...

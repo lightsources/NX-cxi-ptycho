@@ -10,7 +10,10 @@ import os
 # [-] put data into the tree
 # [-] add option for user input on execution
 # [-] option to add multiple dataset to multiple entries
-# [-] positioner names and get data using map/zip of data array --> think of best ways to load these
+# [-] add positioner data and define names per axis
+
+# FIXME
+# [ ] check why nxs file is x times larger than the original cxi file
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +23,6 @@ class NX_Creator:
     Manage HDF5 file creation for Ptychography data.
 
     USAGE::
-
         example_metadata = dict(
             instrument="ptycho demo",
             title="The first NX ptycho file demo",
@@ -39,6 +41,7 @@ class NX_Creator:
         )
 
     """
+    
 
     def __init_group__(self, h5parent, nm, NX_class, md=None):
         """Common steps to initialize a NeXus HDF5 group."""
@@ -47,6 +50,7 @@ class NX_Creator:
 
         group = h5parent.create_group(nm)
         group.attrs["NX_class"] = NX_class
+        print('H5PARENT:', h5parent)
         return group, md
 
     def add_process_group(
@@ -134,7 +138,12 @@ class NX_Creator:
         ds.attrs["units"] = "m"  # FIXME allow for other units
         ds.attrs["target"] = ds.name
 
-        # TODO Geometry (NXTransformation)
+        # transformation_type = ["translation", "rotation"]
+        # vector =
+        # FIXME Geometry (NXTransformation)
+        # ds = group.create_dataset("geometry", data=)
+        # ds.attrs["transformation_type"] = transformation_type[0]  # FIXME allow for other units
+        # ds.attrs["vector"] = vector
         # AXISNAME (NX_NUMBER)
         # @transformation_type (NX_CHAR)
         # @vector (NX_NUMBER)
@@ -161,7 +170,7 @@ class NX_Creator:
         # NeXus structure: point to this group for default plot
         h5parent.attrs["default"] = group.name.split("/")[-1]
 
-        self.create_instrument_group(group, md=md, current_entry=current_entry)
+        self.create_instrument_group(h5parent=group, md=md, current_entry=current_entry)
         self.create_data_group(group, "data", md=md, current_entry=current_entry)
         self.create_process_group(group, "process_1", current_entry=current_entry, md=md)
 
@@ -169,7 +178,6 @@ class NX_Creator:
 
     def create_instrument_group(self, h5parent, md=None, current_entry=None):
         """Write the NXinstrument group."""
-        # TODO: will need to get and add data
         group, md = self.__init_group__(
             h5parent, "instrument", "NXinstrument", md
         )
@@ -186,7 +194,6 @@ class NX_Creator:
         self.create_monitor_group(group, "monitor", md=md)
         for n in range(md["translation"][f"entry_{current_entry}"].shape[1]):
             self.create_positioner_group(group, f"positioner_{n+1}", current_entry=current_entry, count_positioner=n, md=md)
-
 
     def create_monitor_group(self, h5parent, nm, md=None):
         """Write a NXmonitor group."""
@@ -205,6 +212,7 @@ class NX_Creator:
         ds.attrs["units"] = "m" #FIXME allow for other units
         ds.attrs["target"] = ds.name
 
+        #TODO add other optional values such as raw, target
         # Name (NXchar) = define positioner name (stage axis?)
         # Value [n] (NXnumber) = n position values for positioner 1
         #     @unit (NX_ANY) = unit related to the positioner (angle or m)
@@ -215,8 +223,6 @@ class NX_Creator:
         """Write a NXprocess group."""
         # TODO: will need to get and add data
         group, md = self.__init_group__(h5parent, nm, "NXprocess", md)
-
-        # TODO:
 
     def create_sample_group(self, h5parent, nm, md=None):
         """Write a NXsample group."""
