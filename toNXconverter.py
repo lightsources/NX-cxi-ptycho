@@ -1,14 +1,9 @@
-#!/usr/bin/env python
-
-"""
-Conversion from any (supported) ptycho file to NXcxi_ptycho.
-"""
-
+import h5py
 import logging
 import sys
 
-import nx_creator
-import loaders
+from creator.nx_creator_ptycho import NXCreator
+from creator.loaders import CXILoader
 
 
 def get_user_parameters():
@@ -55,7 +50,11 @@ def get_user_parameters():
 def main():
     options = get_user_parameters()
     output_filename = options.NeXus_file
+    # TODO what to do if file exists (and is still opened elsewhere)? Append?
+    output_file = h5py.File(output_filename, "w")
     input_filename = options.Input_file
+    #TODO request as input
+    chunk_size = 100
 
     choices = "WARNING INFO DEBUG".split()
     logLevel = min(max(0, options.verbose), len(choices) - 1)
@@ -65,34 +64,29 @@ def main():
 
     # TODO: have options to call different loaders based on file suffix
     #load_data = loaders.cxiLoader()
-    load_data = loaders.GeneralLoader(input_filename)
-    load_data.get_data()
-    number_of_entries =  load_data.number_of_entries
-
-    ### create dictionary containing the NX groups and fields
-    metadata = dict(
-        # used in header and NXinstrument
-        instrument=load_data.source_name,
-        # used in NXentry
-        title="The first NX ptycho file demo",
-        experiment_description="simple",
-        # NX fields
-        energy=load_data.energy,
-        x_pixel_size=load_data.x_pixel_size,
-        y_pixel_size=load_data.y_pixel_size,
-        distance=load_data.distance,
-        data=load_data.data,
-        #FIXME accommodate different translation input variants
-        translation=load_data.translation,
-
-        # not used anywhere
-        other="some other metadata that will be ignored"
-    )
-
+    loader = CXILoader(input_filename)
+    number_of_entries = len([entry for entry in loader.data_file.keys() if 'entry' in entry])
+    print('Total number of entries in single file is:', number_of_entries)
+    #TODO remove after testing
+    number_of_entries = 3
+    for n in range(1, number_of_entries+1):
+        data_dict = loader.data_dict(n)
     # write the data to a NeXus file
-    creator = nx_creator.NX_Creator()
-    # print("METADATA dict: {}".format(metadata))
-    creator.write_new_file(output_filename, number_of_entries=number_of_entries, md=metadata)
+        creator = NXCreator(output_file)
+        group = creator.create_entry_group(entry_number=n, experiment_description="Ptycho experiment",
+                                           title="Ptychography")
+        instrument_group = creator.create_instrument_group(group, "Ptychography Beamline")
+        creator.create_beam_group(instrument_group,
+                                  energy=data_dict.get("energy")
+                                  )
+        creator.create_detector_group(instrument_group,
+                                      "Detector",
+                                      distance=data_dict.get("distance"),
+                                      x_pixel_size=data_dict.get("x_pixel_size"),
+                                      y_pixel_size=data_dict.get("y_pixel_size")
+                                      )
+        # creator.write_new_file(output_filename, number_of_entries=number_of_entries, md=data_dict)
+    output_file.close()
     logger.info("Wrote HDF5 file: %s", output_filename)
 
 
