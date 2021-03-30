@@ -42,16 +42,27 @@ class NX_Creator:
 
     """
     
+    def __init__(self, h5root):
+        self._h5root = h5root
 
-    def __init_group__(self, h5parent, nm, NX_class, md=None):
+    def _init_group(self, h5parent, nm, NX_class):
         """Common steps to initialize a NeXus HDF5 group."""
-        if md is None:
-            md = {}
-
         group = h5parent.create_group(nm)
         group.attrs["NX_class"] = NX_class
-        print('H5PARENT:', h5parent)
-        return group, md
+        return group
+
+
+    def _create_dataset(self, group, name, value, **kwargs):
+        """
+        use this to create datasets in different (sub-)groups
+        """
+        if value is None:
+            return
+        ds = group.create_dataset(name, data=value)
+        for k, v in kwargs.items():
+            ds.attrs[k] = v
+        ds.attrs["target"] = ds.name
+        return ds
 
     def add_process_group(
         self,
