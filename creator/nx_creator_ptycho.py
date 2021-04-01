@@ -53,6 +53,39 @@ class NXCreator:
         group.attrs["NX_class"] = NX_class
         return group
 
+    def write_file_header(self, h5parent, md=None):
+        """optional header metadata"""
+        #TODO check how this can be implemented in a better way
+        if md is None:
+            md = {}
+        timestamp = datetime.datetime.now().isoformat(
+            sep=" ", timespec="seconds"
+        )
+        logger.debug("timestamp: %s", str(timestamp))
+
+        # give the HDF5 root some more attributes
+        h5parent.attrs["file_name"] = h5parent.filename
+        h5parent.attrs["file_time"] = timestamp
+        instrument_name = md.get("instrument")['entry_1']
+        if instrument_name is not None:
+            h5parent.attrs["instrument"] = instrument_name
+        h5parent.attrs["creator"] = __file__  # TODO: better choice?
+        h5parent.attrs["HDF5_Version"] = h5py.version.hdf5_version
+        h5parent.attrs["h5py_version"] = h5py.version.version
+
+    def write_new_file(self, output_filename, number_of_entries=1, md=None):
+        """Write the complete NeXus file."""
+        #TODO check if this can be shared with other converters or moved to different module
+        if md is None:
+            md = {}
+        with h5py.File(output_filename, "w") as root:
+            self.write_file_header(root, md=md)
+            for entry in range(1, number_of_entries+1):
+            # for entry in range(1, len(md['energy'])+1):
+                print(f'writing entry_{entry}')
+                self.create_entry_group(root, md=md, current_entry=entry)
+        root.close()
+
     def _create_dataset(self, group, name, value, chunk_size=None, auto_chunk=False, **kwargs):
         """
         use this to create datasets in different (sub-)groups
@@ -151,6 +184,11 @@ class NXCreator:
                                 ):
         pass
 
+    def create_monitor_group(self, h5parent, nm, md=None):
+        """Write a NXmonitor group."""
+        # TODO: will need to get and add data
+        pass
+
     def create_data_group(self, h5parent, nm, current_entry, md=None):
         """ Write a NXdata group.
             describes the plottable data and related dimension scales
@@ -162,7 +200,7 @@ class NXCreator:
 
 ### Add other groups later ###
 
-    def add_process_group(
+    def create_process_group(
         self,
         hdf5filename,
         entrygroup="/entry",
@@ -187,49 +225,6 @@ class NXCreator:
                 )
                 self.create_process_group(group, nm, current_entry=1, md=md)
 
-    def count_subgroups(self, h5parent, nxclass):
-        """Count the number of subgroups of a specific NX_class."""
-        count = 0
-        for key in h5parent.keys():
-            obj = h5parent[key]
-            if not isinstance(obj, h5py.Group):
-                continue
-            nxclass = obj.attrs.get("NX_class")
-            if nxclass == "NXprocess":
-                count += 1
-        return count
-
-    # def create_instrument_group(self, h5parent, md=None, current_entry=None):
-    #     """Write the NXinstrument group."""
-    #     group, md = self.__init_group__(
-    #         h5parent, "instrument", "NXinstrument", md
-    #     )
-    #
-    #     name_field = md.get("instrument", "")[f"entry_{current_entry}"]
-    #     ds = group.create_dataset("name", data=name_field)
-    #     ds.attrs["target"] = ds.name  # we'll re-use this
-    #     logger.debug("instrument: %s", name_field)
-    #
-    #     self.create_beam_group(group, "beam", md=md, current_entry=current_entry)
-    #     self.create_detector_group(group, "detector_1", md=md, current_entry=current_entry)
-    #     #TODO allow to add different detector group data
-    #     # self.create_detector_group(group, "detector_2", md=md)
-    #     self.create_monitor_group(group, "monitor", md=md)
-    #     for n in range(md["translation"][f"entry_{current_entry}"].shape[1]):
-    #         self.create_positioner_group(group, f"positioner_{n+1}", current_entry=current_entry, count_positioner=n, md=md)
-
-
-
-    def create_monitor_group(self, h5parent, nm, md=None):
-        """Write a NXmonitor group."""
-        # TODO: will need to get and add data
-        pass
-
-    def create_process_group(self, h5parent, nm, current_entry, md=None):
-        """Write a NXprocess group."""
-        # TODO: will need to get and add data
-        pass
-
     def create_sample_group(self, h5parent, nm, md=None):
         """Write a NXsample group."""
         # TODO: will need to get and add data
@@ -247,35 +242,18 @@ class NXCreator:
         #   An attribute with the units for each positioner
         #   is required.
 
-    def write_file_header(self, h5parent, md=None):
-        """optional header metadata"""
-        #TODO check how this can be implemented in a better way
-        if md is None:
-            md = {}
-        timestamp = datetime.datetime.now().isoformat(
-            sep=" ", timespec="seconds"
-        )
-        logger.debug("timestamp: %s", str(timestamp))
 
-        # give the HDF5 root some more attributes
-        h5parent.attrs["file_name"] = h5parent.filename
-        h5parent.attrs["file_time"] = timestamp
-        instrument_name = md.get("instrument")['entry_1']
-        if instrument_name is not None:
-            h5parent.attrs["instrument"] = instrument_name
-        h5parent.attrs["creator"] = __file__  # TODO: better choice?
-        h5parent.attrs["HDF5_Version"] = h5py.version.hdf5_version
-        h5parent.attrs["h5py_version"] = h5py.version.version
 
-    def write_new_file(self, output_filename, number_of_entries=1, md=None):
-        """Write the complete NeXus file."""
-        #TODO check if this can be shared with other converters or moved to different module
-        if md is None:
-            md = {}
-        with h5py.File(output_filename, "w") as root:
-            self.write_file_header(root, md=md)
-            for entry in range(1, number_of_entries+1):
-            # for entry in range(1, len(md['energy'])+1):
-                print(f'writing entry_{entry}')
-                self.create_entry_group(root, md=md, current_entry=entry)
-        root.close()
+
+
+    def count_subgroups(self, h5parent, nxclass):
+        """Count the number of subgroups of a specific NX_class."""
+        count = 0
+        for key in h5parent.keys():
+            obj = h5parent[key]
+            if not isinstance(obj, h5py.Group):
+                continue
+            nxclass = obj.attrs.get("NX_class")
+            if nxclass == "NXprocess":
+                count += 1
+        return count
