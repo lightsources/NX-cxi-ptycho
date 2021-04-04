@@ -50,11 +50,7 @@ def get_user_parameters():
 def main():
     options = get_user_parameters()
     output_filename = options.NeXus_file
-    # TODO what to do if file exists (and is still opened elsewhere)? Append?
-    output_file = h5py.File(output_filename, "w")
     input_filename = options.Input_file
-    #TODO request as input
-    chunk_size = 100
 
     choices = "WARNING INFO DEBUG".split()
     logLevel = min(max(0, options.verbose), len(choices) - 1)
@@ -69,24 +65,21 @@ def main():
     print('Total number of entries in single file is:', number_of_entries)
     #TODO remove after testing
     number_of_entries = 3
+    creator = NXCreator(output_filename)
+    creator.init_file()
     for n in range(1, number_of_entries+1):
         data_dict = loader.data_dict(n)
     # write the data to a NeXus file
-        creator = NXCreator(output_file)
-        group = creator.create_entry_group(entry_number=n, experiment_description="Ptycho experiment",
+        creator.create_entry_group(entry_number=n, experiment_description="Ptycho experiment",
                                            title="Ptychography")
-        instrument_group = creator.create_instrument_group(group, "Ptychography Beamline")
-        creator.create_beam_group(instrument_group,
-                                  energy=data_dict.get("energy")
-                                  )
-        creator.create_detector_group(instrument_group,
-                                      "Detector",
-                                      distance=data_dict.get("distance"),
+        creator.create_instrument_group("Ptychography Beamline")
+        creator.create_beam_group(energy=data_dict.get("energy"))
+        creator.create_detector_group(distance=data_dict.get("distance"),
                                       x_pixel_size=data_dict.get("x_pixel_size"),
                                       y_pixel_size=data_dict.get("y_pixel_size")
                                       )
-        # creator.write_new_file(output_filename, number_of_entries=number_of_entries, md=data_dict)
-    output_file.close()
+
+
     logger.info("Wrote HDF5 file: %s", output_filename)
 
 

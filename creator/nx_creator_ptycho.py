@@ -46,18 +46,26 @@ class NXCreator:
     
     def __init__(self, output_filename):
         self._output_filename = output_filename
-        self.entry_group = None
-        self.instrument_group = None
+        self.entry_group_name = None
+        self.instrument_group_name = None
         self.detector_group = None
         self.beam_group = None
         self.monitor_group = None
         self.positioner_group = None
 
-    def _init_group(self, h5parent, nm, NX_class):
+    def _init_group(self, h5parent, name, NX_class):
         """Common steps to initialize a NeXus HDF5 group."""
-        group = h5parent.create_group(nm)
+        group = h5parent.create_group(name)
         group.attrs["NX_class"] = NX_class
+        print(group.name)
         return group
+
+    def init_file(self):
+        """Write the complete NeXus file."""
+        #TODO check how this can be shared with other converters or moved to different module
+        with h5py.File(self._output_filename, "w") as file:
+            self.write_file_header(file)
+
 
     def write_file_header(self, output_file):
         """optional header metadata"""
@@ -73,53 +81,22 @@ class NXCreator:
         output_file.attrs["HDF5_Version"] = h5py.version.hdf5_version
         output_file.attrs["h5py_version"] = h5py.version.version
 
-    def write_new_file(self,
-                       output_filename: str,
-                       number_of_entries: int = 1):
-        """Write the complete NeXus file."""
-        #TODO check if this can be shared with other converters or moved to different module
-        with h5py.File(output_filename, "w") as file:
-            self.write_file_header(root)
-            for entry in range(1, number_of_entries+1):
-            # for entry in range(1, len(md['energy'])+1):
-                print(f'writing entry_{entry}')
-                self.create_entry_group(file)
-        file.close()
-
     def _create_dataset(self, group, name, value, chunk_size=None, auto_chunk=False, **kwargs):
         """
         use this to create datasets in different (sub-)groups
         """
         if value is None:
             return
-        if chunk_size is not None and auto_chunk is False:
-            ds = group.create_dataset(name, data=value, chunks=chunk_size)
-        elif auto_chunk is True:
-            ds = group.create_dataset(name, data=value, chunks=auto_chunk)
-        else:
-            ds = group.create_dataset(name, data=value)
+        ds = group.create_dataset(name, data=value)
         for k, v in kwargs.items():
             ds.attrs[k] = v
         ds.attrs["target"] = ds.name
         return ds
 
-    def count_subgroups(self, h5parent, nxclass):
-        """Count the number of subgroups of a specific NX_class."""
-        count = 0
-        for key in h5parent.keys():
-            obj = h5parent[key]
-            if not isinstance(obj, h5py.Group):
-                continue
-            nxclass = obj.attrs.get("NX_class")
-            if nxclass == "NXprocess":
-                count += 1
-        return count
-
     def create_entry_group(self,
-                           entry_number: int = 1,
+                           entry_number: int = None,
                            experiment_description: str = None,
-                           title: str = None,
-                           count_entry=None):
+                           title: str = None):
         #TODO check if other NX converters can share this method for less duplication
         """
         all information about the measurement
@@ -131,20 +108,23 @@ class NXCreator:
         else:
             # TODO how will count_entry be defined when connecting to the loader?
             entry_name = f"entry_{entry_number}"
-        self.entry_group = self._init_group(self._output_filename, nm=entry_name, NX_class="NXentry")
 
-        self.entry_group.create_dataset("definition", data=NX_APP_DEF_NAME)
-        if experiment_description is not None:
-            experiment_description = experiment_description
-        else:
-            experiment_description = 'Default Ptychography experiment'
-        self._create_dataset(self.entry_group, "experiment_description", experiment_description)
-        title = title if title is not None else "default"
-        self._create_dataset(self.entry_group, "title", title)
-        logger.debug("title: %s", title)
+        with h5py.File(self._output_filename, "a") as file:
+            entry_group = self._init_group(file, entry_name, "NXentry")
+            self.entry_group_name = entry_group.name
 
-        # FIXME: Check NeXus structure: point to this group for default plot
-        self._output_filename.attrs["default"] = group.name.split("/")[-1]
+            entry_group.create_dataset("definition", data=NX_APP_DEF_NAME)
+            if experiment_description is not None:
+                experiment_description = experiment_description
+            else:
+                experiment_description = 'Default Ptychography experiment'
+            self._create_dataset(entry_group, "experiment_description", experiment_description)
+            title = title if title is not None else "default"
+            self._create_dataset(entry_group, "title", title)
+            logger.debug("title: %s", title)
+
+            # FIXME: Check NeXus structure: point to this group for default plot
+            file.attrs["default"] = entry_group.name.split("/")[-1]
 
 
     def create_instrument_group(self,
@@ -152,7 +132,9 @@ class NXCreator:
                                 name_of_instrument: str = None,
                                 *args,
                                 **kwargs):
-        self.instrument_group = self._init_group(h5parent, "instrument", "NX_CHAR")
+        with h5py.File(self._output_filename, "a") as file:
+            instrument_group = self._init_group(file[self.entry_group_name], "instrument", "NXinstrument")
+            self.instrument_group_name = instrument_group.name
 
 
     def create_beam_group(self,
@@ -165,12 +147,13 @@ class NXCreator:
                           **kwargs):
 
         """Write the NXbeam group."""
-        self.beam_group = self._init_group(self.instrument_group, "Beam", "NXbeam")
+        with h5py.File(self._output_filename, "a") as file:
+            self.beam_group = self._init_group(file[self.instrument_group_name], "Beam", "NXbeam")
 
-        self._create_dataset(self.beam_group, "energy", energy, unit='eV')
-        self._create_dataset(self.beam_group, "wavelength", wavelength, unit='m')
-        self._create_dataset(self.beam_group, "extend", extent, unit='m')
-        self._create_dataset(self.beam_group, "polarization", polarization, unit='a.u')
+            self._create_dataset(self.beam_group, "energy", energy, unit='eV')
+            self._create_dataset(self.beam_group, "wavelength", wavelength, unit='m')
+            self._create_dataset(self.beam_group, "extend", extent, unit='m')
+            self._create_dataset(self.beam_group, "polarization", polarization, unit='a.u')
 
     def create_detector_group(self,
                               data: np.ndarray = None,
@@ -181,12 +164,13 @@ class NXCreator:
                               **kwargs):
 
         """Write a NXdetector group."""
-        self.detector_group = self._init_group(self.instrument_group, "Detector", "NXdetector")
+        with h5py.File(self._output_filename, "a") as file:
+            self.detector_group = self._init_group(file[self.instrument_group_name], "Detector", "NXdetector")
 
-        self._create_dataset(self.detector_group, "distance", distance, unit='m')
-        self._create_dataset(self.detector_group, "x_pixel_size", x_pixel_size, unit='m')
-        self._create_dataset(self.detector_group, "y_pixel_size", y_pixel_size, unit='m')
-        self._create_dataset(self.detector_group, "data", data, unit='m')
+            self._create_dataset(self.detector_group, "distance", distance, unit='m')
+            self._create_dataset(self.detector_group, "x_pixel_size", x_pixel_size, unit='m')
+            self._create_dataset(self.detector_group, "y_pixel_size", y_pixel_size, unit='m')
+            self._create_dataset(self.detector_group, "data", data, unit='m')
 
     def create_positioner_group(self,
                                 positioner_name: str=None,
@@ -194,8 +178,9 @@ class NXCreator:
                                 pos_values: float=None,
                                 ):
         #TODO take care of positioner name or counting (count_group)
-        self.positioner_group = self._init_group(self.instrument_group, f"Positioner_{count_group}", "NXpositioner")
-        pass
+        with h5py.File(self._output_filename, "a") as file:
+            self.positioner_group = self._init_group(file[self.instrument_group_name], f"Positioner_{count_group}", "NXpositioner")
+
 
     def create_monitor_group(self):
         """Write a NXmonitor group."""
@@ -256,8 +241,15 @@ class NXCreator:
         #   An attribute with the units for each positioner
         #   is required.
 
-
-
-
-
+    def count_subgroups(self, h5parent, nxclass):
+        """Count the number of subgroups of a specific NX_class."""
+        count = 0
+        for key in h5parent.keys():
+            obj = h5parent[key]
+            if not isinstance(obj, h5py.Group):
+                continue
+            nxclass = obj.attrs.get("NX_class")
+            if nxclass == "NXprocess":
+                count += 1
+        return count
 
