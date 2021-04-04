@@ -106,7 +106,6 @@ class NXCreator:
         if entry_number is None:
             entry_name = "entry"
         else:
-            # TODO how will count_entry be defined when connecting to the loader?
             entry_name = f"entry_{entry_number}"
 
         with h5py.File(self._output_filename, "a") as file:
@@ -165,6 +164,7 @@ class NXCreator:
 
         """Write a NXdetector group."""
         with h5py.File(self._output_filename, "a") as file:
+            #TODO adding multiple detector entries (add counting index)
             self.detector_group = self._init_group(file[self.instrument_group_name], "Detector", "NXdetector")
 
             self._create_dataset(self.detector_group, "distance", distance, unit='m')
