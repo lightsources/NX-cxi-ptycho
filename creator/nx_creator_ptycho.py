@@ -43,7 +43,7 @@ class NXCreator:
         )
 
     """
-    
+
     def __init__(self, output_filename):
         self._output_filename = output_filename
         self.entry_group_name = None
@@ -60,12 +60,15 @@ class NXCreator:
         print(group.name)
         return group
 
-    def init_file(self):
+    def __enter__(self):
         """Write the complete NeXus file."""
         #TODO check how this can be shared with other converters or moved to different module
         with h5py.File(self._output_filename, "w") as file:
             self.write_file_header(file)
+        return self
 
+    def __exit__(self, type, value, traceback):
+        pass
 
     def write_file_header(self, output_file):
         """optional header metadata"""
