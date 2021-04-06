@@ -148,8 +148,8 @@ class NXCreator:
 
 
     def create_beam_group(self,
+                          energy: float,
                           entry_number: int=1,
-                          energy: float = None,
                           wavelength: float = None,
                           extent: float = None,
                           polarization: float = None,
@@ -166,10 +166,10 @@ class NXCreator:
             self._create_dataset(self.beam_group, "polarization", polarization, unit='a.u')
 
     def create_detector_group(self,
-                              data: np.ndarray = None,
-                              distance: float = None,
-                              x_pixel_size: float = None,
-                              y_pixel_size: float = None,
+                              data: np.ndarray,
+                              distance: float,
+                              x_pixel_size: float,
+                              y_pixel_size: float,
                               *args,
                               **kwargs):
 
