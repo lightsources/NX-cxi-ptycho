@@ -49,6 +49,7 @@ class NXCreator:
         self.entry_group_name = None
         self.instrument_group_name = None
         self.detector_group = None
+        self.detector_group_name = None
         self.beam_group = None
         self.monitor_group = None
         self.positioner_group = None
@@ -61,25 +62,36 @@ class NXCreator:
         return group
 
     def init_file(self):
-        """Write the complete NeXus file."""
+        """Write a basic NeXus file.
+        This is only called once per file
+        writing some header information. Then file is closed.
+        Actual data will be added opening the file in "a" mode
+        see below in the different create_group methods
+        """
         #TODO check how this can be shared with other converters or moved to different module
         with h5py.File(self._output_filename, "w") as file:
             self.write_file_header(file)
 
 
     def write_file_header(self, output_file):
-        """optional header metadata"""
+        """optional header metadata for writing a new file"""
         #TODO check how this can be implemented in a better way
         timestamp = datetime.datetime.now().isoformat(sep=" ", timespec="seconds")
+        # intentionally time stamp is recorded on file initialization only
+        # each dataset can have on time stamps when adding it later
         logger.debug("timestamp: %s", str(timestamp))
+        output_file.attrs["start_time"] = timestamp
         # give the HDF5 root some more attributes
         output_file.attrs["file_name"] = output_file.filename
         output_file.attrs["file_time"] = timestamp
-        #TODO does instrument name belong in header?
+        #TODO does instrument name belong in header? --> move to instrument group instead
         output_file.attrs["instrument"] = "instrument_name"
         output_file.attrs["creator"] = __file__  # TODO: better choice?
         output_file.attrs["HDF5_Version"] = h5py.version.hdf5_version
         output_file.attrs["h5py_version"] = h5py.version.version
+        #TODO what time stamp do we need? postpone this discussion for now!
+        #output_file.attrs["end_time"] = timestamp
+
 
     def _create_dataset(self, group, name, value, chunk_size=None, auto_chunk=False, **kwargs):
         """
@@ -155,10 +167,10 @@ class NXCreator:
             self._create_dataset(self.beam_group, "polarization", polarization, unit='a.u')
 
     def create_detector_group(self,
-                              data: np.ndarray = None,
-                              distance: float = None,
-                              x_pixel_size: float = None,
-                              y_pixel_size: float = None,
+                              data: np.ndarray,
+                              distance: float,
+                              x_pixel_size: float,
+                              y_pixel_size: float,
                               *args,
                               **kwargs):
 
@@ -166,6 +178,7 @@ class NXCreator:
         with h5py.File(self._output_filename, "a") as file:
             #TODO adding multiple detector entries (add counting index)
             self.detector_group = self._init_group(file[self.instrument_group_name], "Detector", "NXdetector")
+            self.detector_group_name = self.detector_group.name
 
             self._create_dataset(self.detector_group, "distance", distance, unit='m')
             self._create_dataset(self.detector_group, "x_pixel_size", x_pixel_size, unit='m')
@@ -173,13 +186,30 @@ class NXCreator:
             self._create_dataset(self.detector_group, "data", data, unit='m')
 
     def create_positioner_group(self,
-                                positioner_name: str=None,
-                                count_group: int=1,
-                                pos_values: float=None,
+                                positioner_name: str,
+                                pos_values: float,
+                                count_group: int = 1,
                                 ):
         #TODO take care of positioner name or counting (count_group)
         with h5py.File(self._output_filename, "a") as file:
             self.positioner_group = self._init_group(file[self.instrument_group_name], f"Positioner_{count_group}", "NXpositioner")
+
+    def create_geometry_group(self,
+                              axis_name: str = None,
+                              transformation_type: str = None,
+                              vector: np.ndarray = None,
+                              offset: np.ndarray = None):
+        with h5py.File(self._output_filename, "a") as file:
+            geometry_group = self._init_group(file[self.detector_group_name], "Geometry", "NXtransformations")
+            #TODO check if axis_name needs to have a specific key
+
+            # specifying an empty list in order to just write the entry name with no data
+            self._create_dataset(geometry_group, axis_name, [])
+            #FIXME these entries must be attrs instead
+            self._create_dataset(geometry_group, "transformation_type", transformation_type)
+            self._create_dataset(geometry_group, "vector", vector)
+            self._create_dataset(geometry_group, "offset", offset)
+            #TODO write set of default geometry modules
 
 
     def create_monitor_group(self):

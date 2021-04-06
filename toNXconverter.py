@@ -66,6 +66,8 @@ def main():
     #TODO remove after testing
     number_of_entries = 3
     creator = NXCreator(output_filename)
+    # add context manager here, to check and catch attribute errors
+    # adding base class for exception handling
     creator.init_file()
     for n in range(1, number_of_entries+1):
         data_dict = loader.data_dict(n)
