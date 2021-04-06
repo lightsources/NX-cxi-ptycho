@@ -2,4 +2,17 @@
 
 Some Python code to convert different ptychography file formats to NeXus data file with proposed NeXus definitions.
 
-Usage: python toNXconverter.py path/to/your_original_file.suffix path/to/your_converted_file.nxs
+
+Dependencies
+--------------------
+  - Python3
+  - h5py
+
+Usage
+--------------------
+In NXcxi_ptycho folder call:
+
+```bash
+python toNXconverter.py your_original_file.suffix your_new_nexus_file.nxs
+```
+
