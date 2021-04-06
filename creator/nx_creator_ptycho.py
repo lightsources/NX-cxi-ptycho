@@ -20,6 +20,11 @@ logger = logging.getLogger(__name__)
 NX_APP_DEF_NAME = "NXptycho"
 NX_EXTENSION = ".nxs"
 
+
+class MissingRequiredDataError(TypeError):
+    pass
+
+
 class NXCreator:
     """
     Manage NeXus file creation for Ptychography data.
@@ -68,7 +73,10 @@ class NXCreator:
         return self
 
     def __exit__(self, type, value, traceback):
-        pass
+        if type is TypeError:
+            raise MissingRequiredDataError(
+                'Check the above TypeError; data required for the NXPtycho'
+                ' format was possibly omitted.') from value
 
     def write_file_header(self, output_file):
         """optional header metadata"""
