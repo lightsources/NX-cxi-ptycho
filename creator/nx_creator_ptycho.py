@@ -20,6 +20,11 @@ logger = logging.getLogger(__name__)
 NX_APP_DEF_NAME = "NXptycho"
 NX_EXTENSION = ".nxs"
 
+
+class MissingRequiredDataError(TypeError):
+    pass
+
+
 class NXCreator:
     """
     Manage NeXus file creation for Ptychography data.
@@ -43,7 +48,7 @@ class NXCreator:
         )
 
     """
-    
+
     def __init__(self, output_filename):
         self._output_filename = output_filename
         self.entry_group_name = None
@@ -61,8 +66,9 @@ class NXCreator:
         print(group.name)
         return group
 
-    def init_file(self):
+    def __enter__(self):
         """Write a basic NeXus file.
+        
         This is only called once per file
         writing some header information. Then file is closed.
         Actual data will be added opening the file in "a" mode
@@ -71,7 +77,13 @@ class NXCreator:
         #TODO check how this can be shared with other converters or moved to different module
         with h5py.File(self._output_filename, "w") as file:
             self.write_file_header(file)
+        return self
 
+    def __exit__(self, type, value, traceback):
+        if type is TypeError:
+            raise MissingRequiredDataError(
+                'Check the above TypeError; data required for the NXPtycho'
+                ' format was possibly omitted.') from value
 
     def write_file_header(self, output_file):
         """optional header metadata for writing a new file"""
@@ -149,8 +161,8 @@ class NXCreator:
 
 
     def create_beam_group(self,
+                          energy: float,
                           entry_number: int=1,
-                          energy: float = None,
                           wavelength: float = None,
                           extent: float = None,
                           polarization: float = None,

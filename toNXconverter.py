@@ -65,21 +65,22 @@ def main():
     print('Total number of entries in single file is:', number_of_entries)
     #TODO remove after testing
     number_of_entries = 3
-    creator = NXCreator(output_filename)
-    # add context manager here, to check and catch attribute errors
-    # adding base class for exception handling
-    creator.init_file()
-    for n in range(1, number_of_entries+1):
-        data_dict = loader.data_dict(n)
-    # write the data to a NeXus file
-        creator.create_entry_group(entry_number=n, experiment_description="Ptycho experiment",
-                                           title="Ptychography")
-        creator.create_instrument_group("Ptychography Beamline")
-        creator.create_beam_group(energy=data_dict.get("energy"))
-        creator.create_detector_group(distance=data_dict.get("distance"),
-                                      x_pixel_size=data_dict.get("x_pixel_size"),
-                                      y_pixel_size=data_dict.get("y_pixel_size")
-                                      )
+    with NXCreator(output_filename) as creator:
+        for n in range(1, number_of_entries+1):
+            data_dict = loader.data_dict(n)
+        # write the data to a NeXus file
+            creator.create_entry_group(
+                entry_number=n,
+                experiment_description="Ptycho experiment",
+                title="Ptychography"
+            )
+            creator.create_instrument_group("Ptychography Beamline")
+            creator.create_beam_group(energy=data_dict.get("energy"))
+            creator.create_detector_group(
+                distance=data_dict.get("distance"),
+                x_pixel_size=data_dict.get("x_pixel_size"),
+                y_pixel_size=data_dict.get("y_pixel_size")
+            )
 
 
     logger.info("Wrote HDF5 file: %s", output_filename)
