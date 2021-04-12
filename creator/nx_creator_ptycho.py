@@ -15,6 +15,7 @@ import numpy as np
 
 # FIXME
 # [ ] check why nxs file is x times larger than the original cxi file
+# [ ] update NXCreator usage documentation
 
 logger = logging.getLogger(__name__)
 NX_APP_DEF_NAME = "NXptycho"
