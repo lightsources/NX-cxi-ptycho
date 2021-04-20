@@ -199,13 +199,23 @@ class NXCreator:
             self._create_dataset(self.detector_group, "data", data, unit='m')
 
     def create_positioner_group(self,
-                                positioner_name: str,
-                                pos_values: float,
-                                count_group: int = 1,
-                                ):
+                                name: str,
+                                value: float,
+                                count: int = 1,
+    ):
         #TODO take care of positioner name or counting (count_group)
         with h5py.File(self._output_filename, "a") as file:
-            self.positioner_group = self._init_group(file[self.instrument_group_name], f"Positioner_{count_group}", "NXpositioner")
+            self.positioner_group = self._init_group(
+                file[self.instrument_group_name],
+                f"Positioner_{count}",
+                "NXpositioner"
+            )
+            self._create_dataset(
+                group=self.positioner_group,
+                name=name,
+                value=value,
+            )
+
 
     def create_geometry_group(self,
                               axis_name: str,
