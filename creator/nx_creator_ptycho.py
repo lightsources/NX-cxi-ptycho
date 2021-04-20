@@ -208,21 +208,33 @@ class NXCreator:
             self.positioner_group = self._init_group(file[self.instrument_group_name], f"Positioner_{count_group}", "NXpositioner")
 
     def create_geometry_group(self,
-                              axis_name: str = None,
+                              axis_name: str,
+                              vector: np.ndarray,
                               transformation_type: str = None,
-                              vector: np.ndarray = None,
                               offset: np.ndarray = None):
-        with h5py.File(self._output_filename, "a") as file:
-            geometry_group = self._init_group(file[self.detector_group_name], "Geometry", "NXtransformations")
-            #TODO check if axis_name needs to have a specific key
+        """Create an NXTransformations group.
 
-            # specifying an empty list in order to just write the entry name with no data
-            self._create_dataset(geometry_group, axis_name, [])
-            #FIXME these entries must be attrs instead
-            self._create_dataset(geometry_group, "transformation_type", transformation_type)
-            self._create_dataset(geometry_group, "vector", vector)
-            self._create_dataset(geometry_group, "offset", offset)
-            #TODO write set of default geometry modules
+        note:: axis_name is optional in the Nexus standard, but required here because
+        otherwise this function would do nothing. If you don't want to name an
+        axis, then don't call this function.
+
+        seealso:: https://manual.nexusformat.org/classes/base_classes/NXtransformations.html
+        """
+        with h5py.File(self._output_filename, "a") as file:
+            geometry_group = self._init_group(
+                file[self.detector_group_name],
+                "Geometry",
+                "NXtransformations",
+            )
+            #TODO check if axis_name needs to have a specific key
+            axis_group = self._create_dataset(geometry_group, axis_name, [])
+            axis_group.attrs["vector"] = vector
+            if transformation_type is not None:
+                axis_group.attrs["transformation_type"] = transformation_type
+            if offset is not None:
+                axis_group.attrs["offset"] = offset
+
+            # TODO write set of default geometry modules
 
 
     def create_monitor_group(self):
