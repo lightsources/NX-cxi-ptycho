@@ -176,7 +176,7 @@ class NXCreator:
 
             self._create_dataset(self.beam_group, "energy", energy, unit='eV')
             self._create_dataset(self.beam_group, "wavelength", wavelength, unit='m')
-            self._create_dataset(self.beam_group, "extend", extent, unit='m')
+            self._create_dataset(self.beam_group, "extent", extent, unit='m')
             self._create_dataset(self.beam_group, "polarization", polarization, unit='a.u')
 
     def create_detector_group(self,
