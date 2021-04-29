@@ -16,14 +16,12 @@ def main():
     At this point, we assume the user has enough working knowledge of the
     format to call the NXCreator.create_foo() functions in the correct order.
     """
+
     with NXCreator('dummy.nx') as creator:
 
-        entry = creator.create_entry_group(
-            entry_number=1,  # TODO: just use 'count' or 'number'
-            definition='basic',
-        )
+        entry = creator.create_entry_group(definition='basic')
 
-        instrument = creator.create_instrument_group(entry=entry, )
+        instrument = creator.create_instrument_group(entry=entry)
 
         creator.create_beam_group(
             instrument=instrument,
@@ -31,14 +29,14 @@ def main():
         )
         detector = creator.create_detector_group(
             instrument=instrument,
-            data=np.empty((400, 1023, 513), dtype=np.int16),
+            data=np.empty((4, 32, 32), dtype=np.int16),
             distance=34,  # TODO: distance is redundant with transformation?
             x_pixel_size=244,
             y_pixel_size=244,
         )
         # NOTE: Create transformation function is slightly redundant because
         # there can only be one transformation per group.
-        transformation = creator.create_transformation(h5parent=detector, )
+        transformation = creator.create_transformation_group(h5parent=detector)
         creator.create_axis(
             transformation=transformation,
             axis_name='z',
@@ -54,24 +52,24 @@ def main():
         theta = creator.create_positioner_group(
             h5parent=sample,
             name='rotation',
-            raw_value=np.empty(2346),
+            raw_value=np.empty(7),
         )
         x = creator.create_positioner_group(
             h5parent=sample,
             name='horizontal',
-            raw_value=np.empty(2346),
+            raw_value=np.empty(7),
         )
         y = creator.create_positioner_group(
             h5parent=sample,
             name='vertical',
-            raw_value=np.empty(2346),
+            raw_value=np.empty(7),
         )
 
-        transformation = creator.create_transformation(h5parent=sample, )
+        transformation = creator.create_transformation_group(h5parent=sample)
         creator.create_axis(
             transformation=transformation,
             axis_name='rotation',
-            value=theta,  # value is linked from positioner group
+            value=theta['raw_value'],  # value is linked from positioner group
             transformation_type='rotation',
             vector=np.array([0, 1, 0], dtype=float),
             offset=np.zeros(3, dtype=float),
@@ -80,7 +78,7 @@ def main():
         creator.create_axis(
             transformation=transformation,
             axis_name='x',
-            value=x,
+            value=x['raw_value'],
             transformation_type='translation',
             vector=np.array([1, 0, 0], dtype=float),
             offset=np.zeros(3, dtype=float),
@@ -89,17 +87,11 @@ def main():
         creator.create_axis(
             transformation=transformation,
             axis_name='y',
-            value=y,
+            value=y['raw_value'],
             transformation_type='translation',
             vector=np.array([0, 1, 0], dtype=float),
             offset=np.zeros(3, dtype=float),
             depends_on='x',
-        )
-
-        creator.create_data_group(
-            data=detector['data'],
-            x=x,
-            y=y,
         )
 
 
