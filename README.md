@@ -14,3 +14,4 @@ In NXcxi_ptycho folder call:
 ```bash
 python toNXconverter.py your_original_file.suffix your_new_nexus_file.nxs
 ```
+
