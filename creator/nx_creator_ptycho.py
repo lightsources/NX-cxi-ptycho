@@ -111,7 +111,10 @@ class NXCreator:
         """Conveniently create a dataset in a Nexus HDF5 group."""
         if value is None:
             return
-        ds = group.create_dataset(name, data=value)
+        if isinstance(value, h5py.VirtualLayout):
+            ds = group.create_virtual_dataset(name, layout=value)
+        else:
+            ds = group.create_dataset(name, data=value)
         for k, v in kwargs.items():
             ds.attrs[k] = v
         ds.attrs["target"] = ds.name
