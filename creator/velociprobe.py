@@ -12,7 +12,7 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
     it also contains a bunch of nonsense in the NXTransformations.
     """
 
-    with h5py.File(master_path, 'r+') as f, NXCreator(nexus_path) as creator:
+    with h5py.File(master_path, 'r') as f, NXCreator(nexus_path) as creator:
 
         entry = creator.create_entry_group(definition='basic')
 
