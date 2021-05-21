@@ -12,6 +12,6 @@ Usage
 In NXcxi_ptycho folder call:
 
 ```bash
-python toNXconverter.py your_original_file.suffix your_new_nexus_file.nxs
+python toNXconverter.py path/to/your_original_file.suffix path/to/your_converted_file.nxs
 ```
 
