@@ -265,8 +265,7 @@ class NXCreator:
     def create_axis(
         self,
         transformation: h5py.Group,
-        axis_name: str,
-        value: np.ndarray,
+        value: str,
         transformation_type: str,
         vector: np.ndarray,
         offset: np.ndarray,
@@ -274,7 +273,6 @@ class NXCreator:
     ):
         axis = self._create_dataset(
             group=transformation,
-            name=axis_name,
             value=value,
         )
         axis.attrs['transformation_type'] = transformation_type
