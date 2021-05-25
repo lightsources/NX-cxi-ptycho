@@ -34,7 +34,6 @@ class CXILoader():
 
     def data_dict(self, entry_number):
         cxi_dict = dict(
-            ### Defining the Keys
             ### Beam/Source fields
             source_name=self.data_file.get(f'entry_{entry_number}/instrument_1/source_1/name'),
             energy=self.data_file.get(f'entry_{entry_number}/instrument_1/source_1/energy'),

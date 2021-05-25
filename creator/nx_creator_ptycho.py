@@ -120,7 +120,7 @@ class NXCreator:
     # TODO: check if other NX converters can share this method for less
     # duplication
     def create_entry_group(self,
-                           definition: str,
+                           definition: str=NX_APP_DEF_NAME,
                            entry_number: int = None,
                            experiment_description: str = None,
                            title: str = None):
@@ -136,7 +136,7 @@ class NXCreator:
         entry_group = self._init_group(self.file_handle, entry_name, "NXentry")
         self.entry_group_name = entry_group.name
 
-        entry_group.create_dataset("definition", data=NX_APP_DEF_NAME)
+        entry_group.create_dataset("definition", data=definition)
         if experiment_description is not None:
             experiment_description = experiment_description
         else:
@@ -175,10 +175,10 @@ class NXCreator:
                           **kwargs):
         """Write the NXbeam group."""
         self.beam_group = self._init_group(
-            self.file_handle[self.instrument_group_name],
-            "beam",
-            "NXbeam",
-        )
+                                           self.file_handle[self.instrument_group_name],
+                                           "beam",
+                                           "NXbeam",
+                                          )
 
         self._create_dataset(self.beam_group,
                              "energy",
@@ -188,7 +188,9 @@ class NXCreator:
                              "wavelength",
                              wavelength,
                              unit='m')
-        self._create_dataset(self.beam_group, "extent", extent, unit='m')
+        self._create_dataset(self.beam_group,
+                             "extent", extent,
+                             unit='m')
         self._create_dataset(self.beam_group,
                              "polarization",
                              polarization,
