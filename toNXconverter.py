@@ -59,7 +59,6 @@ def main():
     logger = logging.getLogger(__name__)
 
     # TODO: have options to call different loaders based on file suffix
-    #load_data = loaders.cxiLoader()
     loader = CXILoader(input_filename)
     number_of_entries = len([entry for entry in loader.data_file.keys() if 'entry' in entry])
     print('Total number of entries in single file is:', number_of_entries)
@@ -68,19 +67,20 @@ def main():
     with NXCreator(output_filename) as creator:
         for n in range(1, number_of_entries+1):
             data_dict = loader.data_dict(n)
-        # write the data to a NeXus file
-            creator.create_entry_group(
+            entry = creator.create_entry_group(
                 entry_number=n,
                 experiment_description="Ptycho experiment",
                 title="Ptychography"
             )
-            creator.create_instrument_group("Ptychography Beamline")
-            creator.create_beam_group(energy=data_dict.get("energy"))
-            creator.create_detector_group(
-                distance=data_dict.get("distance"),
-                x_pixel_size=data_dict.get("x_pixel_size"),
-                y_pixel_size=data_dict.get("y_pixel_size")
-            )
+
+            instrument = creator.create_instrument_group(entry=entry)
+
+            beam = creator.create_beam_group(incident_energy=data_dict.get("energy"))
+            detector = creator.create_detector_group(data=data_dict.get("data"),
+                                                     distance=data_dict.get("distance"),
+                                                     x_pixel_size=data_dict.get("x_pixel_size"),
+                                                     y_pixel_size=data_dict.get("y_pixel_size")
+                                                    )
 
 
     logger.info("Wrote HDF5 file: %s", output_filename)
