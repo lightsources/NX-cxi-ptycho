@@ -75,12 +75,17 @@ def main():
 
             instrument = creator.create_instrument_group(entry=entry)
 
-            beam = creator.create_beam_group(incident_energy=data_dict.get("energy"))
+            beam = creator.create_beam_group(incident_beam_energy=data_dict.get("energy"))
             detector = creator.create_detector_group(data=data_dict.get("data"),
                                                      distance=data_dict.get("distance"),
                                                      x_pixel_size=data_dict.get("x_pixel_size"),
                                                      y_pixel_size=data_dict.get("y_pixel_size")
                                                     )
+            transformation = creator.create_transformation_group(h5parent=detector)
+            # TODO get axis information from some sort of config file
+            creator.create_axis()
+            # TODO add positioner information
+            positioner1 = creator.create_positioner_group()
 
 
     logger.info("Wrote HDF5 file: %s", output_filename)

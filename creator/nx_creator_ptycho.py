@@ -166,7 +166,7 @@ class NXCreator:
         return instrument_group
 
     def create_beam_group(self,
-                          incident_energy: float,
+                          incident_beam_energy: float,
                           entry_number: int = 1,
                           wavelength: float = None,
                           extent: float = None,
@@ -182,7 +182,7 @@ class NXCreator:
 
         self._create_dataset(self.beam_group,
                              "energy",
-                             incident_energy,
+                             incident_beam_energy,
                              unit='eV')
         self._create_dataset(self.beam_group,
                              "wavelength",
@@ -219,7 +219,9 @@ class NXCreator:
                              "y_pixel_size",
                              y_pixel_size,
                              unit='m')
-        self._create_dataset(self.detector_group, "data", data, unit='m')
+        self._create_dataset(self.detector_group,
+                             "data",
+                             data, unit='m')
 
         return self.detector_group
 
