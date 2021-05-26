@@ -37,17 +37,20 @@ class CXILoader():
             ### Beam/Source fields
             source_name=self.data_file.get(f'entry_{entry_number}/instrument_1/source_1/name'),
             energy=self.data_file.get(f'entry_{entry_number}/instrument_1/source_1/energy'),
-            # probe_key = 'instrument_1/source_1/data_illumination'
+            # data_illumination_key = 'instrument_1/source_1/data_illumination'
             # probe_key = 'instrument_1/source_1/probe'
             # probe_mask_key = 'instrument_1/source_1/probe_mask'
+            # source_name_key = 'entry_1/instrument_1/source_1/name' # Lightsource Name
+            # instrument_name_key = 'entry_1/instrument_1/name' # beamline name
             ### Detector fields
+            data=self.data_file.get(f'entry_{entry_number}/instrument_1/detector_1/data'),
             x_pixel_size=self.data_file.get(f'entry_{entry_number}/instrument_1/detector_1/x_pixel_size'),
             y_pixel_size=self.data_file.get(f'entry_{entry_number}/instrument_1/detector_1/y_pixel_size'),
             distance=self.data_file.get(f'entry_{entry_number}/instrument_1/detector_1/distance'),
             translation=self.data_file.get(f'entry_{entry_number}/instrument_1/detector_1/translation'),
             # self.data_avg_key = 'instrument_1/detector_1/Data Average'
             ### Data (plottable data?) fields
-            data=self.data_file.get(f'entry_{entry_number}/data_1/data')
+
         )
         return cxi_dict
 
