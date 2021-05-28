@@ -141,7 +141,8 @@ class NXCreator:
             experiment_description = experiment_description
         else:
             experiment_description = 'Default Ptychography experiment'
-        self._create_dataset(entry_group, "experiment_description",
+        self._create_dataset(entry_group,
+                             "experiment_description",
                              experiment_description)
         title = title if title is not None else "default"
         self._create_dataset(entry_group, "title", title)
@@ -153,32 +154,54 @@ class NXCreator:
         return entry_group
 
     def create_instrument_group(self,
-                                entry: h5py.Group,
-                                name_of_instrument: str = None,
+                                parent: h5py.Group,
+                                name: str,
+                                instrument_index: int = None,
                                 *args,
                                 **kwargs):
-        instrument_group = self._init_group(
-            entry,
-            "instrument",
-            "NXinstrument",
-        )
+        """
+        Create instrument group
+
+        :param parent: h5 parent in this case is entry group
+        :param name: actual name of the instrument/beamline/endstation
+        :param instrument_number: index number of the instrument that created the data
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
+        if instrument_index is None:
+            instrument_name = "instrument"
+        else:
+            instrument_name = f'instrument_{instrument_index}'
+
+        instrument_group = self._init_group(parent,
+                                            instrument_name,
+                                            "NXinstrument")
+        self._create_dataset(instrument_group, 'instrument_name', name)
         self.instrument_group_name = instrument_group.name
         return instrument_group
 
     def create_beam_group(self,
+                          parent: h5py.Group,
                           incident_beam_energy: float,
-                          entry_number: int = 1,
+                          beam_index: int = None,
                           wavelength: float = None,
                           extent: float = None,
                           polarization: float = None,
                           *args,
                           **kwargs):
         """Write the NXbeam group."""
-        self.beam_group = self._init_group(
-                                           self.file_handle[self.instrument_group_name],
-                                           "beam",
-                                           "NXbeam",
-                                          )
+
+        if beam_index is None:
+            beam_name = "beam"
+        else:
+            beam_name = f'beam{beam_index}'
+
+        self.beam_group = self._init_group(parent,
+                                           #self.file_handle[self.instrument_group_name],
+                                           beam_name,
+                                           "NXbeam")
 
         self._create_dataset(self.beam_group,
                              "energy",
@@ -197,14 +220,37 @@ class NXCreator:
                              unit='a.u')
         return self.beam_group
 
-    def create_detector_group(self, data: np.ndarray, distance: float,
-                              x_pixel_size: float, y_pixel_size: float, *args,
+    def create_detector_group(self,
+                              parent,
+                              data: np.ndarray,
+                              distance: float,
+                              x_pixel_size: float,
+                              y_pixel_size: float,
+                              detector_index: int = None,
+                              *args,
                               **kwargs):
-        """Write a NXdetector group."""
-        # TODO adding multiple detector entries (add counting index)
-        self.detector_group = self._init_group(
-            self.file_handle[self.instrument_group_name], "detector",
-            "NXdetector")
+        """
+        Write a NXdetector group.
+
+        :param parent: h5 parent in this case is instrument group
+        :param detector_index: index number of the detector that created the data
+        :param distance
+        :param x_pixel_size
+        :param y_pixel_size
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
+        if detector_index is None:
+            detector_name = "detector"
+        else:
+            detector_name = f'detector{detector_index}'
+
+        self.detector_group = self._init_group(parent,
+                                               #self.file_handle[self.instrument_group_name],
+                                               detector_name,
+                                               "NXdetector")
         self.detector_group_name = self.detector_group.name
 
         self._create_dataset(self.detector_group,
@@ -235,23 +281,50 @@ class NXCreator:
         return sample_group
 
     def create_positioner_group(
-        self,
-        h5parent: h5py.Group,
-        name: str,
-        raw_value: float,
-        count: int = 1,
-    ):
+                                self,
+                                h5parent: h5py.Group,
+                                name: str,
+                                raw_value: float = None,
+                                target_value: float = None,
+                                positioner_index: int = None,
+                                count: int = 1,
+                                ):
+        """
+        Write positions
+
+        :param h5parent:
+        :param name:
+        :param raw_value:
+        :param target_value:
+        :param positioner_index:
+        :param count:
+        :return:
+        """
         # TODO take care of positioner name or counting (count_group)
-        self.positioner_group = self._init_group(
-            h5parent,
-            f"{name}",
-            "NXpositioner",
-        )
-        self._create_dataset(
-            group=self.positioner_group,
-            name='raw_value',
-            value=raw_value,
-        )
+        if positioner_index is None:
+            positioner_name = "positioner"
+        else:
+            positioner_name = f'positioner_{positioner_index}'
+
+        self.positioner_group = self._init_group(h5parent,
+                                                 positioner_name,
+                                                "NXpositioner")
+        self._create_dataset(group=self.positioner_group,
+                             name="name",
+                             value=name)
+
+        if raw_value is not None:
+            self._create_dataset(
+                group=self.positioner_group,
+                name='raw_value',
+                value=raw_value,
+            )
+        if target_value is not None:
+            self._create_dataset(
+                group=self.positioner_group,
+                name='target_value',
+                value=target_value,
+            )
         return self.positioner_group
 
     def create_transformation_group(self, h5parent: h5py.Group):
