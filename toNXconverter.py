@@ -67,7 +67,7 @@ def main():
     with NXCreator(output_filename) as creator:
         for n in range(1, number_of_entries+1):
             data_dict = loader.data_dict(n)
-            entry = creator.create_entry_group(entry_number=n,
+            entry = creator.create_entry_group(entry_index=n,
                                                experiment_description="Ptycho experiment",
                                                title="Ptychography")
             # Create instrument group(s), create multiple instances if multiple instruments produced the data,
