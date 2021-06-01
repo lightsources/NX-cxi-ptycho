@@ -113,6 +113,8 @@ class NXCreator:
             return
         if isinstance(value, h5py.VirtualLayout):
             ds = group.create_virtual_dataset(name, layout=value)
+        elif isinstance(value, (h5py.Dataset, h5py.ExternalLink)):
+            group[name] = value
         else:
             ds = group.create_dataset(name, data=value)
         for k, v in kwargs.items():
@@ -274,11 +276,13 @@ class NXCreator:
         vector: np.ndarray,
         offset: np.ndarray,
         depends_on: str,
+        **kwargs,
     ):
         axis = self._create_dataset(
             group=transformation,
             name=axis_name,
             value=value,
+            **kwargs,
         )
         axis.attrs['transformation_type'] = transformation_type
         axis.attrs['vector'] = vector
