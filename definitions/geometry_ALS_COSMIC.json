@@ -1,0 +1,161 @@
+{
+  "Detector_1": {
+    "Axis_1": {
+      "axis_name": [
+        "x_translation",
+        "NX_CHAR"
+      ],
+      "@transformation_type": [
+        "translation",
+        "NX_CHAR"
+      ],
+      "@vector": [
+        "(1,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset": [
+        "(0,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset_units": [
+        "m",
+        "NX_CHAR"
+      ],
+      "@depends_on": [
+        ".",
+        "NX_CHAR"
+      ]
+    },
+    "Axis_2": {
+      "axis_name": [
+        "y_translation",
+        "NX_CHAR"
+      ],
+      "@transformation_type": [
+        "translation",
+        "NX_CHAR"
+      ],
+      "@vector": [
+        "(0,1,0)",
+        "NX_NUMBER"
+      ],
+      "@offset": [
+        "(0,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset_units": [
+        "m",
+        "NX_CHAR"
+      ],
+      "@depends_on": [
+        "x_translatiob",
+        "NX_CHAR"
+      ]
+    },
+    "Axis_3": {
+      "axis_name": [
+        "z_translation",
+        "NX_CHAR"
+      ],
+      "@transformation_type": [
+        "translation",
+        "NX_CHAR"
+      ],
+      "@vector": [
+        "(0,0,1)",
+        "NX_NUMBER"
+      ],
+      "@offset": [
+        "(0,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset_units": [
+        "m",
+        "NX_CHAR"
+      ],
+      "@depends_on": [
+        "y_translatiob",
+        "NX_CHAR"
+      ]
+    }
+  },
+  "Sample_1" : {
+    "Axis_1": {
+      "axis_name": [
+        "x_coarse_translation",
+        "NX_CHAR"
+      ],
+      "@transformation_type": [
+        "translation",
+        "NX_CHAR"
+      ],
+      "@vector": [
+        "(1,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset": [
+        "(0,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset_units": [
+        "m",
+        "NX_CHAR"
+      ],
+      "@depends_on": [
+        ".",
+        "NX_CHAR"
+      ]
+    },
+    "Axis_2": {
+      "axis_name": [
+        "x_fine_translation",
+        "NX_CHAR"
+      ],
+      "@transformation_type": [
+        "translation",
+        "NX_CHAR"
+      ],
+      "@vector": [
+        "(1,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset": [
+        "(0,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset_units": [
+        "m",
+        "NX_CHAR"
+      ],
+      "@depends_on": [
+        "x_translatiob",
+        "NX_CHAR"
+      ]
+    },
+    "Axis_3": {
+      "axis_name": [
+        "y_coarse_translation",
+        "NX_CHAR"
+      ],
+      "@transformation_type": [
+        "translation",
+        "NX_CHAR"
+      ],
+      "@vector": [
+        "(0,1,0)",
+        "NX_NUMBER"
+      ],
+      "@offset": [
+        "(0,0,0)",
+        "NX_NUMBER"
+      ],
+      "@offset_units": [
+        "m",
+        "NX_CHAR"
+      ],
+      "@depends_on": [
+        "y_translatiob",
+        "NX_CHAR"
+      ]
+  }
+}
