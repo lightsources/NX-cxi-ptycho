@@ -79,7 +79,7 @@
       ]
     }
   },
-  "Sample_1" : {
+  "Sample_1": {
     "Axis_1": {
       "axis_name": [
         "x_coarse_translation",
@@ -157,5 +157,6 @@
         "y_translatiob",
         "NX_CHAR"
       ]
+    }
   }
 }
