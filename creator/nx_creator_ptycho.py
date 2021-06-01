@@ -117,21 +117,26 @@ class NXCreator:
         ds.attrs["target"] = ds.name
         return ds
 
-    # TODO: check if other NX converters can share this method for less
-    # duplication
+    # TODO: check if other NX converters can share this method for less duplication
     def create_entry_group(self,
-                           definition: str=NX_APP_DEF_NAME,
-                           entry_number: int = None,
+                           definition: str = NX_APP_DEF_NAME,
+                           entry_index: int = None,
                            experiment_description: str = None,
                            title: str = None):
-        """All information about the measurement.
-
+        """ Create Entry group
+        All information about the measurement.
         see: https://manual.nexusformat.org/classes/base_classes/NXentry.html
+
+        :param defnition: Official NeXus NXDL schema to which this file conforms in our case NXptycho or NXcxi_ptycho
+        :param entry_index: index number of the entry for multi-scan/projection datasets
+        :param args:
+        :param kwargs:
+        :return entry_group
         """
-        if entry_number is None:
+        if entry_index is None:
             entry_name = "entry"
         else:
-            entry_name = f"entry_{entry_number}"
+            entry_name = f"entry_{entry_index}"
 
         entry_group = self._init_group(self.file_handle, entry_name, "NXentry")
         self.entry_group_name = entry_group.name
@@ -191,7 +196,18 @@ class NXCreator:
                           polarization: float = None,
                           *args,
                           **kwargs):
-        """Write the NXbeam group."""
+        """Create the NXbeam group.
+
+        :param parent: h5 parent in this case is instrument group
+        :param incident_beam_energy: incident beam energy in units of energy
+        :param wavelength: incident wavelength energy in units of length
+        :param extent: spatial extend of the beam
+        :param polarization: polarization of the beam
+        :param beam_index: index number of the beam that created the data
+        :param args:
+        :param kwargs:
+        :return:
+        """
 
         if beam_index is None:
             beam_name = "beam"
@@ -233,10 +249,11 @@ class NXCreator:
         Write a NXdetector group.
 
         :param parent: h5 parent in this case is instrument group
+        :param data: actual diffraction patterns as a 3D array [npts, frame_size_x, frame_size_y]
+        :param distance distance between sameple and detector
+        :param x_pixel_size pixel size of the detector in horizontal direction
+        :param y_pixel_size pixel size of the detector in vertical direction
         :param detector_index: index number of the detector that created the data
-        :param distance
-        :param x_pixel_size
-        :param y_pixel_size
         :param args:
         :param kwargs:
         :return:
@@ -287,20 +304,17 @@ class NXCreator:
                                 raw_value: float = None,
                                 target_value: float = None,
                                 positioner_index: int = None,
-                                count: int = 1,
                                 ):
         """
         Write positions
 
-        :param h5parent:
-        :param name:
-        :param raw_value:
-        :param target_value:
-        :param positioner_index:
-        :param count:
+        :param h5parent: parent group is this case is the sample group
+        :param name: a descriptive name of the positioner axis such as translation_x
+        :param raw_value: raw values, e.g. encoder values, of the positions
+        :param target_value: target values, i.e. as commanded, of the positions
+        :param positioner_index: index number for the postioner
         :return:
         """
-        # TODO take care of positioner name or counting (count_group)
         if positioner_index is None:
             positioner_name = "positioner"
         else:
@@ -360,11 +374,6 @@ class NXCreator:
         axis.attrs['depends_on'] = depends_on
         return axis
 
-    def create_monitor_group(self):
-        """Write a NXmonitor group."""
-        # TODO: will need to get and add data
-        pass
-
     def create_data_group(self, entry_number):
         """Write a NXdata group.
 
@@ -375,8 +384,11 @@ class NXCreator:
         # TODO: what should be the plottable data?
         pass
 
-
 ### Add other groups later ###
+    def create_monitor_group(self):
+        """Write a NXmonitor group."""
+        # TODO: will need to get and add data
+        pass
 
     def create_process_group(
         self,
