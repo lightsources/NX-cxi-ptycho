@@ -188,16 +188,16 @@ class NXCreator:
         self._create_dataset(self.beam_group,
                              "energy",
                              incident_energy,
-                             unit='eV')
+                             units='eV')
         self._create_dataset(self.beam_group,
                              "wavelength",
                              wavelength,
-                             unit='m')
-        self._create_dataset(self.beam_group, "extent", extent, unit='m')
+                             units='m')
+        self._create_dataset(self.beam_group, "extent", extent, units='m')
         self._create_dataset(self.beam_group,
                              "polarization",
                              polarization,
-                             unit='a.u')
+                             units='a.u')
         return self.beam_group
 
     def create_detector_group(self, data: np.ndarray, distance: float,
@@ -213,16 +213,16 @@ class NXCreator:
         self._create_dataset(self.detector_group,
                              "distance",
                              distance,
-                             unit='m')
+                             units='m')
         self._create_dataset(self.detector_group,
                              "x_pixel_size",
                              x_pixel_size,
-                             unit='m')
+                             units='m')
         self._create_dataset(self.detector_group,
                              "y_pixel_size",
                              y_pixel_size,
-                             unit='m')
-        self._create_dataset(self.detector_group, "data", data, unit='m')
+                             units='m')
+        self._create_dataset(self.detector_group, "data", data, units='m')
 
         return self.detector_group
 
