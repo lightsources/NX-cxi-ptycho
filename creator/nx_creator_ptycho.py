@@ -290,11 +290,9 @@ class NXCreator:
 
     def create_sample_group(self, entry):
         """Write a NXsample group."""
-        sample_group = self._init_group(
-            entry,
-            "sample",
-            "NXsample",
-        )
+        sample_group = self._init_group(entry,
+                                        "sample",
+                                        "NXsample")
         return sample_group
 
     def create_positioner_group(
@@ -361,6 +359,7 @@ class NXCreator:
         transformation_type: str,
         vector: np.ndarray,
         offset: np.ndarray,
+        offset_units: str,
         depends_on: str,
     ):
         axis = self._create_dataset(
