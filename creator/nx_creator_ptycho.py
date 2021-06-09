@@ -190,6 +190,9 @@ class NXCreator:
     def create_beam_group(self,
                           parent: h5py.Group,
                           incident_beam_energy: float,
+                          energy_untis: str,
+                          wavelength_units: str = None,
+                          extent_untis: str = None,
                           beam_index: int = None,
                           wavelength: float = None,
                           extent: float = None,
@@ -222,26 +225,28 @@ class NXCreator:
         self._create_dataset(self.beam_group,
                              "energy",
                              incident_beam_energy,
-                             unit='eV')
+                             units=energy_untis)
         self._create_dataset(self.beam_group,
                              "wavelength",
                              wavelength,
-                             unit='m')
+                             units=wavelength_units)
         self._create_dataset(self.beam_group,
                              "extent", extent,
-                             unit='m')
+                             units=extent_untis)
         self._create_dataset(self.beam_group,
                              "polarization",
-                             polarization,
-                             unit='a.u')
+                             polarization)
         return self.beam_group
 
     def create_detector_group(self,
                               parent,
                               data: np.ndarray,
+                              data_units: str,
                               distance: float,
+                              distance_units: str,
                               x_pixel_size: float,
                               y_pixel_size: float,
+                              pixel_size_units: str,
                               detector_index: int = None,
                               *args,
                               **kwargs):
@@ -273,18 +278,19 @@ class NXCreator:
         self._create_dataset(self.detector_group,
                              "distance",
                              distance,
-                             unit='m')
+                             unit=distance_units)
         self._create_dataset(self.detector_group,
                              "x_pixel_size",
                              x_pixel_size,
-                             unit='m')
+                             unit=pixel_size_units)
         self._create_dataset(self.detector_group,
                              "y_pixel_size",
                              y_pixel_size,
-                             unit='m')
+                             unit=pixel_size_units)
         self._create_dataset(self.detector_group,
                              "data",
-                             data, unit='m')
+                             data,
+                             unit=data_units)
 
         return self.detector_group
 

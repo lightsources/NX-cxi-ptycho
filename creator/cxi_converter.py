@@ -1,3 +1,4 @@
+import logging
 import sys
 import numpy as np
 import h5py
@@ -28,7 +29,6 @@ def get_user_parameters():
         version="development version",
     )
 
-    #TODO check if this input makes sense
     parser.add_argument(
         "Input_file",
         action="store",
@@ -47,8 +47,13 @@ def main():
     options = get_user_parameters()
     input_filename = options.Input_file
     output_filename = options.NeXus_file
-    data_file = h5py.File(input_filename, 'r')
 
+    choices = "WARNING INFO DEBUG".split()
+    logLevel = min(max(0, options.verbose), len(choices) - 1)
+    logging.basicConfig(level=choices[logLevel])
+    logger = logging.getLogger(__name__)
+
+    data_file = h5py.File(input_filename, 'r')
     def data_dict(entry_index):
         cxi_dict = dict(
                         ### Beam/Source fields
@@ -81,12 +86,16 @@ def main():
             instrument = creator.create_instrument_group(parent=entry,
                                                          name="COSMIC")
             creator.create_beam_group(parent=instrument,
-                                      incident_beam_energy=data_dict(n)["energy"])
+                                      incident_beam_energy=data_dict(n)["energy"],
+                                      energy_untis='eV')
             detector = creator.create_detector_group(parent=instrument,
                                                      data= data_dict(n)["data"],
+                                                     data_units='counts',
                                                      distance= data_dict(n)["distance"],
+                                                     distance_units='m',
                                                      x_pixel_size=data_dict(n)["x_pixel_size"],
-                                                     y_pixel_size=data_dict(n)["y_pixel_size"])
+                                                     y_pixel_size=data_dict(n)["y_pixel_size"],
+                                                     pixel_size_units='um')
             # NOTE: Create transformation function is slightly redundant because
             # there can only be one transformation per group.
             transformation = creator.create_transformation_group(h5parent=detector)
@@ -191,7 +200,7 @@ def main():
                                 offset=np.zeros(3, dtype=float),
                                 offset_units="degree",
                                 depends_on='.')
-
+    logger.info("Wrote HDF5 file: %s", output_filename)
 
 
 if __name__ == "__main__":
