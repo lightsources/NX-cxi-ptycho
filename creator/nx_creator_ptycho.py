@@ -348,13 +348,12 @@ class NXCreator:
     def create_transformation_group(self, h5parent: h5py.Group):
         """Create an NXTransformations group.
 
-        seealso:: https://manual.nexusformat.org/classes/base_classes/NXtransformations.html
+        see also:: https://manual.nexusformat.org/classes/base_classes/NXtransformations.html
+        and example here: https://manual.nexusformat.org/design.html#coordinate-transformation-field-and-attributes
         """
-        transformation_group = self._init_group(
-            h5parent,
-            "transformations",
-            "NXtransformations",
-        )
+        transformation_group = self._init_group(h5parent,
+                                                "transformations",
+                                                "NXtransformations")
         return transformation_group
 
     def create_axis(
