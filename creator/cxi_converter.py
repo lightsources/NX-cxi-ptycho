@@ -55,6 +55,12 @@ def main():
 
     data_file = h5py.File(input_filename, 'r')
     def data_dict(entry_index):
+        """
+        load data from ALS cxi file
+
+        :param entry_index:
+        :return: cxi_dict dictionary holding key-value pairs that is needed to fill the nexus datasets
+        """
         cxi_dict = dict(
                         ### Beam/Source fields
                         source_name=data_file.get(f'entry_{entry_index}/instrument_1/source_1/name'),
@@ -89,9 +95,9 @@ def main():
                                       incident_beam_energy=data_dict(n)["energy"],
                                       energy_untis='eV')
             detector = creator.create_detector_group(parent=instrument,
-                                                     data= data_dict(n)["data"],
+                                                     data=data_dict(n)["data"],
                                                      data_units='counts',
-                                                     distance= data_dict(n)["distance"],
+                                                     distance=data_dict(n)["distance"],
                                                      distance_units='m',
                                                      x_pixel_size=data_dict(n)["x_pixel_size"],
                                                      y_pixel_size=data_dict(n)["y_pixel_size"],
@@ -105,7 +111,7 @@ def main():
                                 transformation_type='translation',
                                 vector=np.array([1, 0, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="m",
+                                units="m",
                                 depends_on=".")
             creator.create_axis(transformation=transformation,
                                 axis_name='y_translation',
@@ -113,7 +119,7 @@ def main():
                                 transformation_type='translation',
                                 vector=np.array([0, 1, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="m",
+                                units="m",
                                 depends_on="x_translation")
             creator.create_axis(transformation=transformation,
                                 axis_name='z_translation',
@@ -121,7 +127,7 @@ def main():
                                 transformation_type='translation',
                                 vector=np.array([0, 0, 1], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="m",
+                                units="m",
                                 depends_on="y_translation")
 
             sample = creator.create_sample_group(entry=entry)
@@ -129,11 +135,11 @@ def main():
             #create positioner groups
             x = creator.create_positioner_group(h5parent=sample,
                                                 name='horizontal',
-                                                raw_value=np.empty(7),
+                                                raw_value=data_dict(n)["translation"][:,0],
                                                 positioner_index=1)
             y = creator.create_positioner_group(h5parent=sample,
                                                 name='vertical',
-                                                raw_value=np.empty(7),
+                                                raw_value=data_dict(n)["translation"][:,1],
                                                 positioner_index=2)
             #create transformation axes
             creator.create_axis(transformation=transformation,
@@ -142,7 +148,7 @@ def main():
                                 transformation_type='translation',
                                 vector=np.array([1, 0, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="m",
+                                units="m",
                                 depends_on=".")
             creator.create_axis(transformation=transformation,
                                 axis_name='x_fine_translation',
@@ -150,7 +156,7 @@ def main():
                                 transformation_type='translation',
                                 vector=np.array([1, 0, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="m",
+                                units="m",
                                 depends_on=".")
             creator.create_axis(transformation=transformation,
                                 axis_name='y_coarse_translation',
@@ -158,7 +164,7 @@ def main():
                                 transformation_type='translation',
                                 vector=np.array([0, 1, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="m",
+                                units="m",
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='y_fine_translation',
@@ -166,7 +172,7 @@ def main():
                                 transformation_type='translation',
                                 vector=np.array([0, 1, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="m",
+                                units="m",
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='z_coarse_translation',
@@ -174,7 +180,7 @@ def main():
                                 transformation_type='translation',
                                 vector=np.array([0, 0, 1], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="m",
+                                units="m",
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='alpha_rotation',
@@ -190,7 +196,7 @@ def main():
                                 transformation_type='rotation',
                                 vector=np.array([0, 1, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="degree",
+                                units="degree",
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='gamma_rotation',
@@ -198,7 +204,7 @@ def main():
                                 transformation_type='rotation',
                                 vector=np.array([0, 0, 1], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="degree",
+                                units="degree",
                                 depends_on='.')
     logger.info("Wrote HDF5 file: %s", output_filename)
 
