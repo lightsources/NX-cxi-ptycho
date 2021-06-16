@@ -83,6 +83,24 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
 
         sample = creator.create_sample_group(entry=entry, )
 
+        x = creator.create_positioner_group(
+            h5parent=sample,
+            name='horizontal',
+            raw_value=positions[:, 0],
+        )
+        y = creator.create_positioner_group(
+            h5parent=sample,
+            name='vertical',
+            raw_value=positions[:, 1],
+        )
+        rotation = creator.create_positioner_group(
+            h5parent=sample,
+            name='rotation',
+            # TODO: ExternalLink not allowed because we add additional
+            # attributes?
+            raw_value=f['entry/sample/goniometer/chi'][...],
+        )
+
         transformation = creator.create_transformation_group(h5parent=sample)
         # Velociprobe sample positioner is horizontal stage on rotation stage
         # on vertical stage.
@@ -90,7 +108,7 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
             depends_on='.',
             transformation=transformation,
             axis_name='vertical',
-            value=positions[:, 1],
+            value=y['raw_value'],
             units='m',
             transformation_type='translation',
             vector=np.array([0, 1, 0], dtype=float),
@@ -100,9 +118,7 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
             depends_on="vertical",
             transformation=transformation,
             axis_name='rotation',
-            # TODO: ExternalLink not allowed because we add additional
-            # attributes?
-            value=f['entry/sample/goniometer/chi'][0],
+            value=rotation['raw_value'],
             units=f['entry/sample/goniometer/chi'].attrs['units'],
             transformation_type='rotation',
             vector=np.array([0, 1, 0], dtype=float),
@@ -112,7 +128,7 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
             depends_on="rotation",
             transformation=transformation,
             axis_name='horizontal',
-            value=positions[:, 0],
+            value=x['raw_value'],
             units='m',
             transformation_type='translation',
             vector=np.array([1, 0, 0], dtype=float),

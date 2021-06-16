@@ -113,8 +113,12 @@ class NXCreator:
             return
         if isinstance(value, h5py.VirtualLayout):
             ds = group.create_virtual_dataset(name, layout=value)
-        elif isinstance(value, (h5py.Dataset, h5py.ExternalLink)):
+        elif isinstance(value, h5py.Dataset):
             group[name] = value
+            ds = group[name]
+        elif isinstance(value, h5py.ExternalLink):
+            group[name] = value
+            return  # Cannot edit external links
         else:
             ds = group.create_dataset(name, data=value)
         for k, v in kwargs.items():
