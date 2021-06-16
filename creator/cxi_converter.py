@@ -89,12 +89,12 @@ def main():
                                                entry_index=n,
                                                experiment_description="basic",
                                                title='test_experiment')
-            instrument = creator.create_instrument_group(parent=entry,
+            instrument = creator.create_instrument_group(h5parent=entry,
                                                          name="COSMIC")
-            creator.create_beam_group(parent=instrument,
+            creator.create_beam_group(h5parent=instrument,
                                       incident_beam_energy=data_dict(n)["energy"],
                                       energy_untis='eV')
-            detector = creator.create_detector_group(parent=instrument,
+            detector = creator.create_detector_group(h5parent=instrument,
                                                      data=data_dict(n)["data"],
                                                      data_units='counts',
                                                      distance=data_dict(n)["distance"],
@@ -130,7 +130,7 @@ def main():
                                 units="m",
                                 depends_on="y_translation")
 
-            sample = creator.create_sample_group(entry=entry)
+            sample = creator.create_sample_group(h5parent=entry)
             transformation = creator.create_transformation_group(h5parent=sample)
             #create positioner groups
             x = creator.create_positioner_group(h5parent=sample,
