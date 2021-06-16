@@ -85,9 +85,6 @@ class NXCreator:
         # give the HDF5 root some more attributes
         output_file.attrs["file_name"] = output_file.filename
         output_file.attrs["file_time"] = timestamp
-        # TODO does instrument name belong in header? --> move to instrument
-        # group instead
-        output_file.attrs["instrument"] = "instrument_name"
         output_file.attrs["creator"] = __file__  # TODO: better choice?
         output_file.attrs["HDF5_Version"] = h5py.version.hdf5_version
         output_file.attrs["h5py_version"] = h5py.version.version
@@ -159,7 +156,7 @@ class NXCreator:
         return entry_group
 
     def create_instrument_group(self,
-                                parent: h5py.Group,
+                                h5parent: h5py.Group,
                                 name: str,
                                 instrument_index: int = None,
                                 *args,
@@ -167,7 +164,7 @@ class NXCreator:
         """
         Create instrument group
 
-        :param parent: h5 parent in this case is entry group
+        :param h5parent: h5 parent in this case is entry group
         :param name: actual name of the instrument/beamline/endstation
         :param instrument_number: index number of the instrument that created the data
         :param args:
@@ -180,7 +177,7 @@ class NXCreator:
         else:
             instrument_name = f'instrument_{instrument_index}'
 
-        instrument_group = self._init_group(parent,
+        instrument_group = self._init_group(h5parent,
                                             instrument_name,
                                             "NXinstrument")
         self._create_dataset(instrument_group, 'instrument_name', name)
@@ -188,7 +185,7 @@ class NXCreator:
         return instrument_group
 
     def create_beam_group(self,
-                          parent: h5py.Group,
+                          h5parent: h5py.Group,
                           incident_beam_energy: float,
                           energy_untis: str,
                           wavelength_units: str = None,
@@ -201,7 +198,7 @@ class NXCreator:
                           **kwargs):
         """Create the NXbeam group.
 
-        :param parent: h5 parent in this case is instrument group
+        :param h5parent: h5 parent in this case is instrument group
         :param incident_beam_energy: incident beam energy in units of energy
         :param wavelength: incident wavelength energy in units of length
         :param extent: spatial extend of the beam
@@ -217,7 +214,7 @@ class NXCreator:
         else:
             beam_name = f'beam{beam_index}'
 
-        self.beam_group = self._init_group(parent,
+        self.beam_group = self._init_group(h5parent,
                                            #self.file_handle[self.instrument_group_name],
                                            beam_name,
                                            "NXbeam")
@@ -239,7 +236,7 @@ class NXCreator:
         return self.beam_group
 
     def create_detector_group(self,
-                              parent,
+                              h5parent,
                               data: np.ndarray,
                               data_units: str,
                               distance: float,
@@ -253,7 +250,7 @@ class NXCreator:
         """
         Write a NXdetector group.
 
-        :param parent: h5 parent in this case is instrument group
+        :param h5parent: h5 parent in this case is instrument group
         :param data: actual diffraction patterns as a 3D array [npts, frame_size_x, frame_size_y]
         :param distance distance between sameple and detector
         :param x_pixel_size pixel size of the detector in horizontal direction
@@ -269,7 +266,7 @@ class NXCreator:
         else:
             detector_name = f'detector{detector_index}'
 
-        self.detector_group = self._init_group(parent,
+        self.detector_group = self._init_group(h5parent,
                                                #self.file_handle[self.instrument_group_name],
                                                detector_name,
                                                "NXdetector")
@@ -294,9 +291,12 @@ class NXCreator:
 
         return self.detector_group
 
-    def create_sample_group(self, entry):
-        """Write a NXsample group."""
-        sample_group = self._init_group(entry,
+    def create_sample_group(self, h5parent):
+        """Write a NXsample group.
+
+        :param h5parent: h5 parent group in this case the entry group
+        """
+        sample_group = self._init_group(h5parent,
                                         "sample",
                                         "NXsample")
         return sample_group
@@ -310,9 +310,9 @@ class NXCreator:
                                 positioner_index: int = None,
                                 ):
         """
-        Write positions
+        Write positioner groups
 
-        :param h5parent: parent group is this case is the sample group
+        :param h5parent: h5 parent group is this case is the sample group
         :param name: a descriptive name of the positioner axis such as translation_x
         :param raw_value: raw values, e.g. encoder values, of the positions
         :param target_value: target values, i.e. as commanded, of the positions
@@ -350,6 +350,9 @@ class NXCreator:
 
         see also:: https://manual.nexusformat.org/classes/base_classes/NXtransformations.html
         and example here: https://manual.nexusformat.org/design.html#coordinate-transformation-field-and-attributes
+
+        :param h5parent: h5 parent group in this case either detector or sample
+
         """
         transformation_group = self._init_group(h5parent,
                                                 "transformations",
@@ -383,6 +386,8 @@ class NXCreator:
 
         Describes the plottable data and related dimension scales. Items here
         could be HDF5 datasets or links to datasets.
+
+        :param entry_number:
         """
         # TODO: will need to get and add data
         # TODO: what should be the plottable data?
@@ -418,7 +423,10 @@ class NXCreator:
                 self.create_process_group(group, nm, current_entry=1, md=md)
 
     def count_subgroups(self, h5parent, nxclass):
-        """Count the number of subgroups of a specific NX_class."""
+        """Count the number of subgroups of a specific NX_class.
+
+        :param h5parent: h5 parent group
+        """
         count = 0
         for key in h5parent.keys():
             obj = h5parent[key]
