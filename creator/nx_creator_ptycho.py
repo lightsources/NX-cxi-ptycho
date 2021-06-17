@@ -3,6 +3,7 @@ import h5py
 import logging
 import os
 import numpy as np
+import pint
 
 # TODO
 # [x] load data (in loader module)
@@ -114,6 +115,47 @@ class NXCreator:
         ds.attrs["target"] = ds.name
         return ds
 
+    def _check_unit(self, name, expected, supplied):
+        """
+        Unit check for supplied units
+
+        Our test for units should check if the supplied
+        units string can be mapped into the expected units for that field.
+        If arbitrary units are supplied in form of 'au', 'a.u.' or 'a.u' no conversion is applied
+        and pint if not used for the unit check.
+
+        :param : name of field
+        :param : expected units
+        :param : units string that was given
+        :return *bool*: `True` if units conversion is possible:
+        """
+
+        # catch arbitrary unit separately from pint --> point that out in documentation
+        if supplied in ['au', 'a.u.', 'a.u']:
+            logger.info("Info: arbitrary units supplied for '%s' in form of '%s' np unit conversion applicable",
+                        name,
+                        supplied)
+            return True
+        else:
+            ureg = pint.UnitRegistry()
+            user = 1.0 * ureg(supplied)
+            try:
+                user.to(expected)
+                return True
+            except pint.DimensionalityError:
+                logger.warning("WARNING: '%s': Supplied unit (%s) does not match expected units (%s)",
+                               name,
+                               supplied,
+                               expected)
+                return False
+
+    def _create_data_with_unit(self, group, name, value, expected, supplied):
+
+        if self._check_unit(name, expected, supplied):
+            self._create_dataset(group, name, value, units=supplied)
+        else:
+            self._create_dataset(group, name, value)
+
     # TODO: check if other NX converters can share this method for less duplication
     def create_entry_group(self,
                            definition: str = NX_APP_DEF_NAME,
@@ -187,7 +229,7 @@ class NXCreator:
     def create_beam_group(self,
                           h5parent: h5py.Group,
                           incident_beam_energy: float,
-                          energy_untis: str,
+                          energy_units: str,
                           wavelength_units: str = None,
                           extent_untis: str = None,
                           beam_index: int = None,
@@ -219,17 +261,20 @@ class NXCreator:
                                            beam_name,
                                            "NXbeam")
 
-        self._create_dataset(self.beam_group,
+        self._create_data_with_unit(self.beam_group,
                              "energy",
-                             incident_beam_energy,
-                             units=energy_untis)
-        self._create_dataset(self.beam_group,
+                                    incident_beam_energy,
+                                    expected="eV",
+                                    supplied=energy_units)
+        self._create_data_with_unit(self.beam_group,
                              "wavelength",
-                             wavelength,
-                             units=wavelength_units)
-        self._create_dataset(self.beam_group,
+                                    wavelength,
+                                    expected='m',
+                                    supplied=wavelength_units)
+        self._create_data_with_unit(self.beam_group,
                              "extent", extent,
-                             units=extent_untis)
+                                    expected='m',
+                                    supplied=extent_untis)
         self._create_dataset(self.beam_group,
                              "polarization",
                              polarization)
@@ -272,22 +317,26 @@ class NXCreator:
                                                "NXdetector")
         self.detector_group_name = self.detector_group.name
 
-        self._create_dataset(self.detector_group,
+        self._create_data_with_unit(self.detector_group,
                              "distance",
-                             distance,
-                             unit=distance_units)
-        self._create_dataset(self.detector_group,
+                                    distance,
+                                    expected='m',
+                                    supplied=distance_units)
+        self._create_data_with_unit(self.detector_group,
                              "x_pixel_size",
-                             x_pixel_size,
-                             unit=pixel_size_units)
-        self._create_dataset(self.detector_group,
+                                    x_pixel_size,
+                                    expected='m',
+                                    supplied=pixel_size_units)
+        self._create_data_with_unit(self.detector_group,
                              "y_pixel_size",
-                             y_pixel_size,
-                             unit=pixel_size_units)
-        self._create_dataset(self.detector_group,
+                                    y_pixel_size,
+                                    expected='m',
+                                    supplied=pixel_size_units)
+        self._create_data_with_unit(self.detector_group,
                              "data",
-                             data,
-                             unit=data_units)
+                                    data,
+                                    expected='counts',
+                                    supplied=data_units)
 
         return self.detector_group
 
@@ -367,31 +416,32 @@ class NXCreator:
         transformation_type: str,
         vector: np.ndarray,
         offset: np.ndarray,
-        offset_units: str,
+        units: str,
         depends_on: str,
     ):
-        axis = self._create_dataset(
-            group=transformation,
-            name=axis_name,
-            value=value,
-        )
+        axis = self._create_dataset(group=transformation,
+                                    name=axis_name,
+                                    value=value)
         axis.attrs['transformation_type'] = transformation_type
         axis.attrs['vector'] = vector
         axis.attrs['offset'] = offset
         axis.attrs['depends_on'] = depends_on
         return axis
 
-    def create_data_group(self, entry_number):
+    def create_data_group(self,
+                          h5parent,
+                          signal_data):
         """Write a NXdata group.
 
         Describes the plottable data and related dimension scales. Items here
         could be HDF5 datasets or links to datasets.
 
-        :param entry_number:
+        :param h5parent:
+        :param data: link to data that is marked as plottable data in NeXus for
+                     quick access and overview of the dataset
         """
-        # TODO: will need to get and add data
-        # TODO: what should be the plottable data?
-        pass
+        data_group = self._init_group(h5parent, "data", "NXdata")
+        data_group.attrs['signal'] = signal_data
 
 ### Add other groups later ###
     def create_monitor_group(self):
