@@ -54,6 +54,7 @@ def main():
     logger = logging.getLogger(__name__)
 
     data_file = h5py.File(input_filename, 'r')
+
     def data_dict(entry_index):
         """
         load data from ALS cxi file
@@ -64,25 +65,22 @@ def main():
         cxi_dict = dict(
                         ### Beam/Source fields
                         source_name=data_file.get(f'entry_{entry_index}/instrument_1/source_1/name'),
+                        instrument_name=data_file.get(f'entry_{entry_index}/instrument_1/name'),  # beamline name
                         energy=data_file.get(f'entry_{entry_index}/instrument_1/source_1/energy'),
                         # data_illumination_key = 'instrument_1/source_1/data_illumination'
                         # probe_key = 'instrument_1/source_1/probe'
                         # probe_mask_key = 'instrument_1/source_1/probe_mask'
-                        # source_name_key = 'entry_1/instrument_1/source_1/name' # Lightsource Name
-                        # instrument_name_key = 'entry_1/instrument_1/name' # beamline name
                         ### Detector fields
                         data=data_file.get(f'entry_{entry_index}/instrument_1/detector_1/data'),
+                        data_average=data_file.get(f'entry_{entry_index}/instrument_1/detector_1/Data Average'),
                         x_pixel_size=data_file.get(f'entry_{entry_index}/instrument_1/detector_1/x_pixel_size'),
                         y_pixel_size=data_file.get(f'entry_{entry_index}/instrument_1/detector_1/y_pixel_size'),
                         distance=data_file.get(f'entry_{entry_index}/instrument_1/detector_1/distance'),
-                        translation=data_file.get(f'entry_{entry_index}/instrument_1/detector_1/translation'),
-                        # self.data_avg_key = 'instrument_1/detector_1/Data Average'
-                        ### Data (plottable data?) fields
-
+                        translation=data_file.get(f'entry_{entry_index}/instrument_1/detector_1/translation')
                         )
         return cxi_dict
 
-    number_of_entries = 1
+    number_of_entries = len([entry for entry in data_file.keys() if 'entry' in entry])
     with NXCreator(output_filename) as creator:
         for n in range(1, number_of_entries + 1):
             entry = creator.create_entry_group(definition='NXptycho',
@@ -90,10 +88,10 @@ def main():
                                                experiment_description="basic",
                                                title='test_experiment')
             instrument = creator.create_instrument_group(h5parent=entry,
-                                                         name="COSMIC")
+                                                         name=f"{data_dict(n)['source_name']} {data_dict(n)['instrument_name']}")
             creator.create_beam_group(h5parent=instrument,
                                       incident_beam_energy=data_dict(n)["energy"],
-                                      energy_untis='eV')
+                                      energy_units='eV')
             detector = creator.create_detector_group(h5parent=instrument,
                                                      data=data_dict(n)["data"],
                                                      data_units='counts',
@@ -102,9 +100,9 @@ def main():
                                                      x_pixel_size=data_dict(n)["x_pixel_size"],
                                                      y_pixel_size=data_dict(n)["y_pixel_size"],
                                                      pixel_size_units='um')
-            # NOTE: Create transformation function is slightly redundant because
-            # there can only be one transformation per group.
+            creator.create_data_group(h5parent=entry, signal_data='data')
             transformation = creator.create_transformation_group(h5parent=detector)
+            # create transformation axes
             creator.create_axis(transformation=transformation,
                                 axis_name='x_translation',
                                 value=34,
@@ -132,7 +130,7 @@ def main():
 
             sample = creator.create_sample_group(h5parent=entry)
             transformation = creator.create_transformation_group(h5parent=sample)
-            #create positioner groups
+            # create positioner groups
             x = creator.create_positioner_group(h5parent=sample,
                                                 name='horizontal',
                                                 raw_value=data_dict(n)["translation"][:,0],
@@ -188,7 +186,7 @@ def main():
                                 transformation_type='rotation',
                                 vector=np.array([1, 0, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
-                                offset_units="degree",
+                                units="degree",
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='beta_rotation',
