@@ -1,6 +1,7 @@
 import datetime
 import h5py
 import logging
+import warnings
 import os
 import numpy as np
 import pint
@@ -117,22 +118,21 @@ class NXCreator:
 
     def _check_unit(self, name, expected, supplied):
         """
-        Unit check for supplied units
+        Return `True` if conversion is possible between expected and supplied units.
 
-        Our test for units should check if the supplied
-        units string can be mapped into the expected units for that field.
         If arbitrary units are supplied in form of 'au', 'a.u.' or 'a.u' no conversion is applied
-        and pint if not used for the unit check.
-
+        and pint is not used for the unit check.
         :param : name of field
         :param : expected units
         :param : units string that was given
-        :return *bool*: `True` if units conversion is possible:
+        :return *bool*: `True` if units conversion is possible
+
         """
 
         # catch arbitrary unit separately from pint --> point that out in documentation
         if supplied in ['au', 'a.u.', 'a.u']:
-            logger.info("Info: arbitrary units supplied for '%s' in form of '%s' np unit conversion applicable",
+            logger.info("Arbitrary units supplied for '%s' in form of '%s' no unit conversion or "
+                        "pint unit check applicable",
                         name,
                         supplied)
             return True
@@ -140,21 +140,21 @@ class NXCreator:
             ureg = pint.UnitRegistry()
             user = 1.0 * ureg(supplied)
             try:
-                user.to(expected)
+                user.check(expected)
                 return True
             except pint.DimensionalityError:
-                logger.warning("WARNING: '%s': Supplied unit (%s) does not match expected units (%s)",
-                               name,
-                               supplied,
-                               expected)
+                warnings.warn("WARNING: '%s': Supplied unit (%s) does not match expected units (%s)",
+                             name,
+                             supplied,
+                             expected)
                 return False
 
-    def _create_data_with_unit(self, group, name, value, expected, supplied):
+    def _create_data_with_unit(self, group, name, value, expected, supplied) -> object:
 
         if self._check_unit(name, expected, supplied):
-            self._create_dataset(group, name, value, units=supplied)
+            return self._create_dataset(group, name, value, units=supplied)
         else:
-            self._create_dataset(group, name, value)
+            return self._create_dataset(group, name, value)
 
     # TODO: check if other NX converters can share this method for less duplication
     def create_entry_group(self,
@@ -231,7 +231,7 @@ class NXCreator:
                           incident_beam_energy: float,
                           energy_units: str,
                           wavelength_units: str = None,
-                          extent_untis: str = None,
+                          extent_units: str = None,
                           beam_index: int = None,
                           wavelength: float = None,
                           extent: float = None,
@@ -274,7 +274,7 @@ class NXCreator:
         self._create_data_with_unit(self.beam_group,
                              "extent", extent,
                                     expected='m',
-                                    supplied=extent_untis)
+                                    supplied=extent_units)
         self._create_dataset(self.beam_group,
                              "polarization",
                              polarization)
@@ -412,19 +412,29 @@ class NXCreator:
         self,
         transformation: h5py.Group,
         axis_name: str,
-        value: np.ndarray,
         transformation_type: str,
         vector: np.ndarray,
-        offset: np.ndarray,
-        units: str,
         depends_on: str,
+        offset: np.ndarray,
+        offset_units: str = 'm',
+        value: np.ndarray = 0,
+        units: str = 'm',
     ):
-        axis = self._create_dataset(group=transformation,
-                                    name=axis_name,
-                                    value=value)
+
+        if transformation_type == 'rotation':
+            expected_units = 'deg'
+        if transformation_type == 'translation':
+            expected_units = 'm'
+
+        axis = self._create_data_with_unit(group=transformation,
+                                           name=axis_name,
+                                           value=value,
+                                           expected=expected_units,
+                                           supplied=units)
         axis.attrs['transformation_type'] = transformation_type
         axis.attrs['vector'] = vector
         axis.attrs['offset'] = offset
+        axis.attrs['offset_units'] = offset_units
         axis.attrs['depends_on'] = depends_on
         return axis
 
