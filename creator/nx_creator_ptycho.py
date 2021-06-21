@@ -126,7 +126,6 @@ class NXCreator:
         :param : expected units
         :param : units string that was given
         :return *bool*: `True` if units conversion is possible
-
         """
 
         # catch arbitrary unit separately from pint --> point that out in documentation
@@ -140,6 +139,7 @@ class NXCreator:
             ureg = pint.UnitRegistry()
             user = 1.0 * ureg(supplied)
             try:
+
                 user.check(expected)
                 return True
             except pint.DimensionalityError:
@@ -275,6 +275,7 @@ class NXCreator:
                              "extent", extent,
                                     expected='m',
                                     supplied=extent_units)
+
         self._create_dataset(self.beam_group,
                              "polarization",
                              polarization)
@@ -421,6 +422,7 @@ class NXCreator:
         units: str = 'm',
     ):
 
+
         if transformation_type == 'rotation':
             expected_units = 'deg'
         if transformation_type == 'translation':
@@ -431,6 +433,7 @@ class NXCreator:
                                            value=value,
                                            expected=expected_units,
                                            supplied=units)
+
         axis.attrs['transformation_type'] = transformation_type
         axis.attrs['vector'] = vector
         axis.attrs['offset'] = offset
