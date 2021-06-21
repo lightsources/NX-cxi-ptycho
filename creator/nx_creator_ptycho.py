@@ -138,12 +138,10 @@ class NXCreator:
         else:
             ureg = pint.UnitRegistry()
             user = 1.0 * ureg(supplied)
-            try:
-
-                user.check(expected)
+            if user.check(expected):
                 return True
-            except pint.DimensionalityError:
-                warnings.warn("WARNING: '%s': Supplied unit (%s) does not match expected units (%s)",
+            else:
+                warnings.warn("'%s': Supplied unit (%s) does not match expected units (%s)",
                              name,
                              supplied,
                              expected)
@@ -261,24 +259,27 @@ class NXCreator:
                                            beam_name,
                                            "NXbeam")
 
-        self._create_data_with_unit(self.beam_group,
-                             "energy",
-                                    incident_beam_energy,
-                                    expected="eV",
-                                    supplied=energy_units)
-        self._create_data_with_unit(self.beam_group,
-                             "wavelength",
-                                    wavelength,
-                                    expected='m',
-                                    supplied=wavelength_units)
-        self._create_data_with_unit(self.beam_group,
-                             "extent", extent,
-                                    expected='m',
-                                    supplied=extent_units)
-
-        self._create_dataset(self.beam_group,
-                             "polarization",
-                             polarization)
+        if incident_beam_energy is not None:
+            self._create_data_with_unit(self.beam_group,
+                                        "energy",
+                                        incident_beam_energy,
+                                        expected="eV",
+                                        supplied=energy_units)
+        if wavelength is not None:
+            self._create_data_with_unit(self.beam_group,
+                                        "wavelength",
+                                        wavelength,
+                                        expected='m',
+                                        supplied=wavelength_units)
+        if extent is not None:
+            self._create_data_with_unit(self.beam_group,
+                                        "extent", extent,
+                                        expected='m',
+                                        supplied=extent_units)
+        if polarization is not None:
+            self._create_dataset(self.beam_group,
+                                 "polarization",
+                                 polarization)
         return self.beam_group
 
     def create_detector_group(self,
@@ -319,22 +320,22 @@ class NXCreator:
         self.detector_group_name = self.detector_group.name
 
         self._create_data_with_unit(self.detector_group,
-                             "distance",
+                                    "distance",
                                     distance,
                                     expected='m',
                                     supplied=distance_units)
         self._create_data_with_unit(self.detector_group,
-                             "x_pixel_size",
+                                    "x_pixel_size",
                                     x_pixel_size,
                                     expected='m',
                                     supplied=pixel_size_units)
         self._create_data_with_unit(self.detector_group,
-                             "y_pixel_size",
+                                    "y_pixel_size",
                                     y_pixel_size,
                                     expected='m',
                                     supplied=pixel_size_units)
         self._create_data_with_unit(self.detector_group,
-                             "data",
+                                    "data",
                                     data,
                                     expected='counts',
                                     supplied=data_units)
