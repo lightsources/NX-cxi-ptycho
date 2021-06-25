@@ -137,14 +137,16 @@ class NXCreator:
             return True
         else:
             ureg = pint.UnitRegistry()
-            user = 1.0 * ureg(supplied)
+            try:
+                user = 1.0 * ureg(supplied)
+            except pint.UndefinedUnitError as err:
+                print(f'WARNING: {err} --> units for {name} not written')
+                return
             if user.check(expected):
+                print(f"Units {supplied} added to {name}")
                 return True
             else:
-                warnings.warn("'%s': Supplied unit (%s) does not match expected units (%s)",
-                             name,
-                             supplied,
-                             expected)
+                print(f'WARNING: Supplied unit [{supplied}] for {name} does not match expected units [{expected}]')
                 return False
 
     def _create_data_with_unit(self, group, name, value, expected, supplied) -> object:
