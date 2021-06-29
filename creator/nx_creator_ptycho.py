@@ -18,6 +18,7 @@ import pint
 # [ ] check why nxs file is x times larger than the original cxi file
 # [ ] update NXCreator usage documentation
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 NX_APP_DEF_NAME = "NXptycho"
 NX_EXTENSION = ".nxs"
@@ -115,16 +116,16 @@ class NXCreator:
         ds.attrs["target"] = ds.name
         return ds
 
-    def _check_unit(self, name, expected, supplied):
+    def _check_unit(self, group, name, expected, supplied):
         """
-        Return `True` if conversion is possible between expected and supplied units.
+        Return ``True`` if conversion is possible between expected and supplied units.
 
         If arbitrary units are supplied in form of 'au', 'a.u.' or 'a.u' no conversion is applied
         and pint is not used for the unit check.
         :param : name of field
         :param : expected units
         :param : units string that was given
-        :return *bool*: `True` if units conversion is possible
+        :return *bool*: ``True`` if units conversion is possible
         """
 
         # catch arbitrary unit separately from pint --> point that out in documentation
@@ -139,23 +140,23 @@ class NXCreator:
             try:
                 user = 1.0 * ureg(supplied)
             except pint.UndefinedUnitError as err:
-                logger.warning(' {0} --> units for {1} not written'.format(str(err), name))
+                logger.warning(' %s --> units for %s/%s not written', err, group.name, name)
                 return False
             if user.check(expected):
-                print(f'{name}: units [{supplied}] added')
+                logger.info(' %s/%s: units [%s] added', group.name, name, supplied)
                 return True
             else:
-                logger.warning(f' Supplied unit [{supplied}] for {name} does not match expected units [{expected}]')
+                logger.warning(' Supplied unit [%s] for %s/%s does not match expected units [%s]',
+                               supplied, group.name, name, expected)
                 return False
 
     def _create_data_with_unit(self, group, name, value, expected, supplied) -> object:
 
-        if self._check_unit(name, expected, supplied):
+        if self._check_unit(group, name, expected, supplied):
             return self._create_dataset(group, name, value, units=supplied)
         else:
             return self._create_dataset(group, name, value)
 
-    # TODO: check if other NX converters can share this method for less duplication
     def create_entry_group(self,
                            definition: str = NX_APP_DEF_NAME,
                            entry_index: int = None,
@@ -458,9 +459,10 @@ class NXCreator:
 
         if transformation_type == 'rotation':
             expected_units = 'deg'
-            units = 'deg' if units is None else units
-        if transformation_type == 'translation':
-            units = 'm' if units is None else units
+        elif transformation_type == 'translation':
+            expected_units = 'm'
+        units = expected_units if units is None else units
+        offset_units = expected_units if offset_units is None else offset_units
 
         axis = self._create_data_with_unit(group=transformation,
                                            name=axis_name,
