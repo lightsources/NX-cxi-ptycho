@@ -105,7 +105,6 @@ def main():
             # create transformation axes
             creator.create_axis(transformation=transformation,
                                 axis_name='x_translation',
-                                value=34,
                                 transformation_type='translation',
                                 vector=np.array([1, 0, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
@@ -113,7 +112,6 @@ def main():
                                 depends_on=".")
             creator.create_axis(transformation=transformation,
                                 axis_name='y_translation',
-                                value=34,
                                 transformation_type='translation',
                                 vector=np.array([0, 1, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
@@ -121,7 +119,6 @@ def main():
                                 depends_on="x_translation")
             creator.create_axis(transformation=transformation,
                                 axis_name='z_translation',
-                                value=34,
                                 transformation_type='translation',
                                 vector=np.array([0, 0, 1], dtype=float),
                                 offset=np.zeros(3, dtype=float),
@@ -142,7 +139,6 @@ def main():
             #create transformation axes
             creator.create_axis(transformation=transformation,
                                 axis_name='x_coarse_translation',
-                                value=0,  # value is linked from positioner group
                                 transformation_type='translation',
                                 vector=np.array([1, 0, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
@@ -158,7 +154,6 @@ def main():
                                 depends_on=".")
             creator.create_axis(transformation=transformation,
                                 axis_name='y_coarse_translation',
-                                value=0,
                                 transformation_type='translation',
                                 vector=np.array([0, 1, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
@@ -174,7 +169,6 @@ def main():
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='z_coarse_translation',
-                                value=0,
                                 transformation_type='translation',
                                 vector=np.array([0, 0, 1], dtype=float),
                                 offset=np.zeros(3, dtype=float),
@@ -182,7 +176,6 @@ def main():
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='alpha_rotation',
-                                value=0,
                                 transformation_type='rotation',
                                 vector=np.array([1, 0, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
@@ -190,7 +183,6 @@ def main():
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='beta_rotation',
-                                value=0,
                                 transformation_type='rotation',
                                 vector=np.array([0, 1, 0], dtype=float),
                                 offset=np.zeros(3, dtype=float),
@@ -198,7 +190,6 @@ def main():
                                 depends_on='.')
             creator.create_axis(transformation=transformation,
                                 axis_name='gamma_rotation',
-                                value=0,
                                 transformation_type='rotation',
                                 vector=np.array([0, 0, 1], dtype=float),
                                 offset=np.zeros(3, dtype=float),

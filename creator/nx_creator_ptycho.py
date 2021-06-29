@@ -18,6 +18,7 @@ import pint
 # [ ] check why nxs file is x times larger than the original cxi file
 # [ ] update NXCreator usage documentation
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 NX_APP_DEF_NAME = "NXptycho"
 NX_EXTENSION = ".nxs"
@@ -115,48 +116,47 @@ class NXCreator:
         ds.attrs["target"] = ds.name
         return ds
 
-    def _check_unit(self, name, expected, supplied):
+    def _check_unit(self, group, name, expected, supplied):
         """
-        Unit check for supplied units
+        Return ``True`` if conversion is possible between expected and supplied units.
 
-        Our test for units should check if the supplied
-        units string can be mapped into the expected units for that field.
         If arbitrary units are supplied in form of 'au', 'a.u.' or 'a.u' no conversion is applied
-        and pint if not used for the unit check.
-
+        and pint is not used for the unit check.
         :param : name of field
         :param : expected units
         :param : units string that was given
-        :return *bool*: `True` if units conversion is possible:
+        :return *bool*: ``True`` if units conversion is possible
         """
 
         # catch arbitrary unit separately from pint --> point that out in documentation
         if supplied in ['au', 'a.u.', 'a.u']:
-            logger.info("Info: arbitrary units supplied for '%s' in form of '%s' np unit conversion applicable",
+            logger.info("Arbitrary units supplied for '%s' in form of '%s' no unit conversion or "
+                        "pint unit check applicable",
                         name,
                         supplied)
             return True
         else:
             ureg = pint.UnitRegistry()
-            user = 1.0 * ureg(supplied)
             try:
-                user.to(expected)
+                user = 1.0 * ureg(supplied)
+            except pint.UndefinedUnitError as err:
+                logger.warning(' %s --> units for %s/%s not written', err, group.name, name)
+                return False
+            if user.check(expected):
+                logger.info(' %s/%s: units [%s] added', group.name, name, supplied)
                 return True
-            except pint.DimensionalityError:
-                logger.warning("WARNING: '%s': Supplied unit (%s) does not match expected units (%s)",
-                               name,
-                               supplied,
-                               expected)
+            else:
+                logger.warning(' Supplied unit [%s] for %s/%s does not match expected units [%s]',
+                               supplied, group.name, name, expected)
                 return False
 
-    def _create_data_with_unit(self, group, name, value, expected, supplied):
+    def _create_data_with_unit(self, group, name, value, expected, supplied) -> object:
 
-        if self._check_unit(name, expected, supplied):
-            self._create_dataset(group, name, value, units=supplied)
+        if self._check_unit(group, name, expected, supplied):
+            return self._create_dataset(group, name, value, units=supplied)
         else:
-            self._create_dataset(group, name, value)
+            return self._create_dataset(group, name, value)
 
-    # TODO: check if other NX converters can share this method for less duplication
     def create_entry_group(self,
                            definition: str = NX_APP_DEF_NAME,
                            entry_index: int = None,
@@ -231,7 +231,7 @@ class NXCreator:
                           incident_beam_energy: float,
                           energy_units: str,
                           wavelength_units: str = None,
-                          extent_untis: str = None,
+                          extent_units: str = None,
                           beam_index: int = None,
                           wavelength: float = None,
                           extent: float = None,
@@ -261,23 +261,27 @@ class NXCreator:
                                            beam_name,
                                            "NXbeam")
 
-        self._create_data_with_unit(self.beam_group,
-                             "energy",
-                                    incident_beam_energy,
-                                    expected="eV",
-                                    supplied=energy_units)
-        self._create_data_with_unit(self.beam_group,
-                             "wavelength",
-                                    wavelength,
-                                    expected='m',
-                                    supplied=wavelength_units)
-        self._create_data_with_unit(self.beam_group,
-                             "extent", extent,
-                                    expected='m',
-                                    supplied=extent_untis)
-        self._create_dataset(self.beam_group,
-                             "polarization",
-                             polarization)
+        if incident_beam_energy is not None:
+            self._create_data_with_unit(self.beam_group,
+                                        "energy",
+                                        incident_beam_energy,
+                                        expected="eV",
+                                        supplied=energy_units)
+        if wavelength is not None:
+            self._create_data_with_unit(self.beam_group,
+                                        "wavelength",
+                                        wavelength,
+                                        expected='m',
+                                        supplied=wavelength_units)
+        if extent is not None:
+            self._create_data_with_unit(self.beam_group,
+                                        "extent", extent,
+                                        expected='m',
+                                        supplied=extent_units)
+        if polarization is not None:
+            self._create_dataset(self.beam_group,
+                                 "polarization",
+                                 polarization)
         return self.beam_group
 
     def create_detector_group(self,
@@ -318,22 +322,22 @@ class NXCreator:
         self.detector_group_name = self.detector_group.name
 
         self._create_data_with_unit(self.detector_group,
-                             "distance",
+                                    "distance",
                                     distance,
                                     expected='m',
                                     supplied=distance_units)
         self._create_data_with_unit(self.detector_group,
-                             "x_pixel_size",
+                                    "x_pixel_size",
                                     x_pixel_size,
                                     expected='m',
                                     supplied=pixel_size_units)
         self._create_data_with_unit(self.detector_group,
-                             "y_pixel_size",
+                                    "y_pixel_size",
                                     y_pixel_size,
                                     expected='m',
                                     supplied=pixel_size_units)
         self._create_data_with_unit(self.detector_group,
-                             "data",
+                                    "data",
                                     data,
                                     expected='counts',
                                     supplied=data_units)
@@ -412,19 +416,64 @@ class NXCreator:
         self,
         transformation: h5py.Group,
         axis_name: str,
-        value: np.ndarray,
         transformation_type: str,
         vector: np.ndarray,
-        offset: np.ndarray,
-        units: str,
         depends_on: str,
+        offset: np.ndarray,
+        offset_units: str = None,
+        units: str = None,
+        value: np.ndarray = 0
     ):
-        axis = self._create_dataset(group=transformation,
-                                    name=axis_name,
-                                    value=value)
+        """
+        Add axis to the transformation group.
+
+        :param transformation: h5parent group of the axis
+        :param axis_name: axis name
+        :param transformation_type: This specifies the type of transformation and is either rotation or translation and
+                                    describes the kind of operation performed
+        :param vector: This is a set of 3 values forming a unit vector for direction that describes the components of
+                       either the direction of the rotation axis or the direction along which the translation happens.
+        :param depends_on: The order is encoded through this attribute. The value is the name of the transformation
+                           upon which the current transformation depends on. As each transformation represents possible
+                           motion by a physical device, this dependency expresses the attachment order;
+                           thus, the current device is attached to (or mounted on) the next device referred to by the
+                           attribute.
+                           Allowed values for depends_on are:
+                                .
+                                    A dot ends the depends_on chain
+                                name
+                                    The name of a field within the enclosing group
+                                dir/name
+                                    The name of a field further along the path
+                                /dir/dir/name
+                                    An absolute path to a field in another group
+        :param offset: This is a set of 3 values forming the offset vector for a translation to apply before applying
+                       the operation of the actual transformation. Without this offset attribute, additional virtual
+                       translations would need to be introduced in order to encode mechanical offsets in the axis.
+        :param offset_units: offset units
+        :param units: value units
+        :param value: actual values for the axis and should be linked to the values of the respective NXpositioner group
+        :return axis:
+        """
+
+
+        if transformation_type == 'rotation':
+            expected_units = 'deg'
+        elif transformation_type == 'translation':
+            expected_units = 'm'
+        units = expected_units if units is None else units
+        offset_units = expected_units if offset_units is None else offset_units
+
+        axis = self._create_data_with_unit(group=transformation,
+                                           name=axis_name,
+                                           value=value,
+                                           expected=expected_units,
+                                           supplied=units)
+
         axis.attrs['transformation_type'] = transformation_type
         axis.attrs['vector'] = vector
         axis.attrs['offset'] = offset
+        axis.attrs['offset_units'] = offset_units
         axis.attrs['depends_on'] = depends_on
         return axis
 
