@@ -1,7 +1,6 @@
 import datetime
 import h5py
 import logging
-import warnings
 import os
 import numpy as np
 import pint
@@ -140,13 +139,13 @@ class NXCreator:
             try:
                 user = 1.0 * ureg(supplied)
             except pint.UndefinedUnitError as err:
-                print(f'WARNING: {err} --> units for {name} not written')
-                return
+                logger.warn(' {0} --> units for {1} not written'.format(str(err), name))
+                return False
             if user.check(expected):
-                print(f"Units {supplied} added to {name}")
+                print(f'Units {supplied} added to {name}')
                 return True
             else:
-                print(f'WARNING: Supplied unit [{supplied}] for {name} does not match expected units [{expected}]')
+                logger.warn(f' Supplied unit [{supplied}] for {name} does not match expected units [{expected}]')
                 return False
 
     def _create_data_with_unit(self, group, name, value, expected, supplied) -> object:
