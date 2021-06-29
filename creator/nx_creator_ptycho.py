@@ -419,16 +419,48 @@ class NXCreator:
         vector: np.ndarray,
         depends_on: str,
         offset: np.ndarray,
-        offset_units: str = 'm',
-        value: np.ndarray = 0,
-        units: str = 'm',
+        offset_units: str = None,
+        units: str = None,
+        value: np.ndarray = 0
     ):
+        """
+        Add axis to the transformation group.
+
+        :param transformation: h5parent group of the axis
+        :param axis_name: axis name
+        :param transformation_type: This specifies the type of transformation and is either rotation or translation and
+                                    describes the kind of operation performed
+        :param vector: This is a set of 3 values forming a unit vector for direction that describes the components of
+                       either the direction of the rotation axis or the direction along which the translation happens.
+        :param depends_on: The order is encoded through this attribute. The value is the name of the transformation
+                           upon which the current transformation depends on. As each transformation represents possible
+                           motion by a physical device, this dependency expresses the attachment order;
+                           thus, the current device is attached to (or mounted on) the next device referred to by the
+                           attribute.
+                           Allowed values for depends_on are:
+                                .
+                                    A dot ends the depends_on chain
+                                name
+                                    The name of a field within the enclosing group
+                                dir/name
+                                    The name of a field further along the path
+                                /dir/dir/name
+                                    An absolute path to a field in another group
+        :param offset: This is a set of 3 values forming the offset vector for a translation to apply before applying
+                       the operation of the actual transformation. Without this offset attribute, additional virtual
+                       translations would need to be introduced in order to encode mechanical offsets in the axis.
+        :param offset_units: offset units
+        :param units: value units
+        :param value: actual values for the axis and should be linked to the values of the respective NXpositioner group
+        :return axis:
+        """
 
 
         if transformation_type == 'rotation':
             expected_units = 'deg'
+            units = 'deg' if units is None else units
         if transformation_type == 'translation':
-            expected_units = 'm'
+            units = 'm' if units is None else units
 
         axis = self._create_data_with_unit(group=transformation,
                                            name=axis_name,
