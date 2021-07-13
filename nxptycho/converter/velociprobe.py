@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 
-from .nx_creator_ptycho import NXCreator
+from ..creator import NXCreator
 
 
 def velociprobe2nexus(master_path, position_path, nexus_path):

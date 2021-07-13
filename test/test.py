@@ -1,6 +1,6 @@
 import numpy as np
 
-from nx_creator_ptycho import NXCreator
+from nxptycho.creator import NXCreator
 
 
 def main():
