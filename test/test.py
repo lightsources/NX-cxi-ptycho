@@ -19,7 +19,7 @@ def main():
 
     with NXCreator('dummy.nx') as creator:
 
-        entry = creator.create_entry_group(definition='basic')
+        entry = creator.create_entry_group(definition='NXptycho')
 
         instrument = creator.create_instrument_group(
             h5parent=entry,
