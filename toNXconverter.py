@@ -2,8 +2,8 @@ import h5py
 import logging
 import sys
 
-from creator.nx_creator_ptycho import NXCreator
-from creator.loaders import CXILoader
+from nxptycho.creator import NXCreator
+from nxptycho.loader import CXILoader
 
 
 def get_user_parameters():

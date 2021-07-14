@@ -110,7 +110,16 @@ class NXCreator:
         """Conveniently create a dataset in a Nexus HDF5 group."""
         if value is None:
             return
-        ds = group.create_dataset(name, data=value)
+        if isinstance(value, h5py.VirtualLayout):
+            ds = group.create_virtual_dataset(name, layout=value)
+        elif isinstance(value, h5py.Dataset):
+            group[name] = value
+            ds = group[name]
+        elif isinstance(value, h5py.ExternalLink):
+            group[name] = value
+            return  # Cannot edit external links
+        else:
+            ds = group.create_dataset(name, data=value)
         for k, v in kwargs.items():
             ds.attrs[k] = v
         ds.attrs["target"] = ds.name
@@ -130,27 +139,30 @@ class NXCreator:
 
         # catch arbitrary unit separately from pint --> point that out in documentation
         if supplied in ['au', 'a.u.', 'a.u']:
-            logger.info("Arbitrary units supplied for '%s' in form of '%s' no unit conversion or "
-                        "pint unit check applicable",
-                        name,
-                        supplied)
+            logger.info(
+                "Arbitrary units supplied for '%s' in form of '%s' no unit conversion or "
+                "pint unit check applicable", name, supplied)
             return True
         else:
             ureg = pint.UnitRegistry()
             try:
                 user = 1.0 * ureg(supplied)
             except pint.UndefinedUnitError as err:
-                logger.warning(' %s --> units for %s/%s not written', err, group.name, name)
+                logger.warning(' %s --> units for %s/%s not written', err,
+                               group.name, name)
                 return False
             if user.check(expected):
-                logger.info(' %s/%s: units [%s] added', group.name, name, supplied)
+                logger.info(' %s/%s: units [%s] added', group.name, name,
+                            supplied)
                 return True
             else:
-                logger.warning(' Supplied unit [%s] for %s/%s does not match expected units [%s]',
-                               supplied, group.name, name, expected)
+                logger.warning(
+                    ' Supplied unit [%s] for %s/%s does not match expected units [%s]',
+                    supplied, group.name, name, expected)
                 return False
 
-    def _create_data_with_unit(self, group, name, value, expected, supplied) -> object:
+    def _create_data_with_unit(self, group, name, value, expected,
+                               supplied) -> object:
 
         if self._check_unit(group, name, expected, supplied):
             return self._create_dataset(group, name, value, units=supplied)
@@ -185,8 +197,7 @@ class NXCreator:
             experiment_description = experiment_description
         else:
             experiment_description = 'Default Ptychography experiment'
-        self._create_dataset(entry_group,
-                             "experiment_description",
+        self._create_dataset(entry_group, "experiment_description",
                              experiment_description)
         title = title if title is not None else "default"
         self._create_dataset(entry_group, "title", title)
@@ -219,8 +230,7 @@ class NXCreator:
         else:
             instrument_name = f'instrument_{instrument_index}'
 
-        instrument_group = self._init_group(h5parent,
-                                            instrument_name,
+        instrument_group = self._init_group(h5parent, instrument_name,
                                             "NXinstrument")
         self._create_dataset(instrument_group, 'instrument_name', name)
         self.instrument_group_name = instrument_group.name
@@ -256,10 +266,11 @@ class NXCreator:
         else:
             beam_name = f'beam{beam_index}'
 
-        self.beam_group = self._init_group(h5parent,
-                                           #self.file_handle[self.instrument_group_name],
-                                           beam_name,
-                                           "NXbeam")
+        self.beam_group = self._init_group(
+            h5parent,
+            #self.file_handle[self.instrument_group_name],
+            beam_name,
+            "NXbeam")
 
         if incident_beam_energy is not None:
             self._create_data_with_unit(self.beam_group,
@@ -275,13 +286,12 @@ class NXCreator:
                                         supplied=wavelength_units)
         if extent is not None:
             self._create_data_with_unit(self.beam_group,
-                                        "extent", extent,
+                                        "extent",
+                                        extent,
                                         expected='m',
                                         supplied=extent_units)
         if polarization is not None:
-            self._create_dataset(self.beam_group,
-                                 "polarization",
-                                 polarization)
+            self._create_dataset(self.beam_group, "polarization", polarization)
         return self.beam_group
 
     def create_detector_group(self,
@@ -315,10 +325,11 @@ class NXCreator:
         else:
             detector_name = f'detector{detector_index}'
 
-        self.detector_group = self._init_group(h5parent,
-                                               #self.file_handle[self.instrument_group_name],
-                                               detector_name,
-                                               "NXdetector")
+        self.detector_group = self._init_group(
+            h5parent,
+            #self.file_handle[self.instrument_group_name],
+            detector_name,
+            "NXdetector")
         self.detector_group_name = self.detector_group.name
 
         self._create_data_with_unit(self.detector_group,
@@ -349,19 +360,18 @@ class NXCreator:
 
         :param h5parent: h5 parent group in this case the entry group
         """
-        sample_group = self._init_group(h5parent,
-                                        "sample",
-                                        "NXsample")
+        sample_group = self._init_group(h5parent, "sample", "NXsample")
         return sample_group
 
     def create_positioner_group(
-                                self,
-                                h5parent: h5py.Group,
-                                name: str,
-                                raw_value: float = None,
-                                target_value: float = None,
-                                positioner_index: int = None,
-                                ):
+        self,
+        h5parent: h5py.Group,
+        name: str,
+        raw_value: float = None,
+        target_value: float = None,
+        positioner_index: int = None,
+        units: str = "",
+    ):
         """
         Write positioner groups
 
@@ -377,9 +387,8 @@ class NXCreator:
         else:
             positioner_name = f'positioner_{positioner_index}'
 
-        self.positioner_group = self._init_group(h5parent,
-                                                 positioner_name,
-                                                "NXpositioner")
+        self.positioner_group = self._init_group(h5parent, positioner_name,
+                                                 "NXpositioner")
         self._create_dataset(group=self.positioner_group,
                              name="name",
                              value=name)
@@ -389,12 +398,14 @@ class NXCreator:
                 group=self.positioner_group,
                 name='raw_value',
                 value=raw_value,
+                units=units,
             )
         if target_value is not None:
             self._create_dataset(
                 group=self.positioner_group,
                 name='target_value',
                 value=target_value,
+                units=units,
             )
         return self.positioner_group
 
@@ -407,23 +418,20 @@ class NXCreator:
         :param h5parent: h5 parent group in this case either detector or sample
 
         """
-        transformation_group = self._init_group(h5parent,
-                                                "transformations",
+        transformation_group = self._init_group(h5parent, "transformations",
                                                 "NXtransformations")
         return transformation_group
 
-    def create_axis(
-        self,
-        transformation: h5py.Group,
-        axis_name: str,
-        transformation_type: str,
-        vector: np.ndarray,
-        depends_on: str,
-        offset: np.ndarray,
-        offset_units: str = None,
-        units: str = None,
-        value: np.ndarray = 0
-    ):
+    def create_axis(self,
+                    transformation: h5py.Group,
+                    axis_name: str,
+                    transformation_type: str,
+                    vector: np.ndarray,
+                    depends_on: str,
+                    offset: np.ndarray,
+                    offset_units: str = None,
+                    units: str = None,
+                    value: np.ndarray = 0):
         """
         Add axis to the transformation group.
 
@@ -456,7 +464,6 @@ class NXCreator:
         :return axis:
         """
 
-
         if transformation_type == 'rotation':
             expected_units = 'deg'
         elif transformation_type == 'translation':
@@ -477,9 +484,7 @@ class NXCreator:
         axis.attrs['depends_on'] = depends_on
         return axis
 
-    def create_data_group(self,
-                          h5parent,
-                          signal_data):
+    def create_data_group(self, h5parent, signal_data):
         """Write a NXdata group.
 
         Describes the plottable data and related dimension scales. Items here
@@ -492,7 +497,9 @@ class NXCreator:
         data_group = self._init_group(h5parent, "data", "NXdata")
         data_group.attrs['signal'] = signal_data
 
+
 ### Add other groups later ###
+
     def create_monitor_group(self):
         """Write a NXmonitor group."""
         # TODO: will need to get and add data
