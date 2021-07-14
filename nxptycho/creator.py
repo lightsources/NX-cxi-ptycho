@@ -370,6 +370,7 @@ class NXCreator:
         raw_value: float = None,
         target_value: float = None,
         positioner_index: int = None,
+        units: str = "",
     ):
         """
         Write positioner groups
@@ -397,12 +398,14 @@ class NXCreator:
                 group=self.positioner_group,
                 name='raw_value',
                 value=raw_value,
+                units=units,
             )
         if target_value is not None:
             self._create_dataset(
                 group=self.positioner_group,
                 name='target_value',
                 value=target_value,
+                units=units,
             )
         return self.positioner_group
 

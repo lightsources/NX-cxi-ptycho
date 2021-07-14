@@ -15,9 +15,12 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
 
     with h5py.File(master_path, 'r') as f, NXCreator(nexus_path) as creator:
 
-        entry = creator.create_entry_group(definition='basic')
+        entry = creator.create_entry_group(definition='NXptycho')
 
-        instrument = creator.create_instrument_group(entry=entry)
+        instrument = creator.create_instrument_group(
+            h5parent=entry,
+            name='velociprobe',
+        )
 
         # The beam group already exists in velociprobe data
         instrument['beam'] = h5py.ExternalLink(
@@ -52,15 +55,18 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
         # filled with garbage, so we must copy the entries we need instead of
         # linking the whole group.
         detector = creator.create_detector_group(
-            instrument=instrument,
+            h5parent=instrument,
             data=layout,
+            data_units='counts',
             # TODO: distance is redundant with transformation?
             distance=f['/entry/instrument/detector/detector_distance'][(
             )],  # meter
+            distance_units='m',
             x_pixel_size=f['/entry/instrument/detector/x_pixel_size'][(
             )],  # meter
             y_pixel_size=f['/entry/instrument/detector/y_pixel_size'][(
             )],  # meter
+            pixel_size_units='m',
         )
         # TODO: Are unit attributes? Copied from source automatically or
         # overwritten by NXCreator?
@@ -81,17 +87,21 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
 
         positions = np.genfromtxt(position_path, delimiter=",")  # m
 
-        sample = creator.create_sample_group(entry=entry, )
+        sample = creator.create_sample_group(h5parent=entry, )
 
         x = creator.create_positioner_group(
             h5parent=sample,
             name='horizontal',
             raw_value=positions[:, 0],
+            positioner_index=0,
+            units='m',
         )
         y = creator.create_positioner_group(
             h5parent=sample,
             name='vertical',
             raw_value=positions[:, 1],
+            positioner_index=1,
+            units='m',
         )
         rotation = creator.create_positioner_group(
             h5parent=sample,
@@ -99,6 +109,9 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
             # TODO: ExternalLink not allowed because we add additional
             # attributes?
             raw_value=f['entry/sample/goniometer/chi'][...],
+            positioner_index=2,
+            units=f['entry/sample/goniometer/chi'].attrs['units'].decode(
+                "utf-8"),
         )
 
         transformation = creator.create_transformation_group(h5parent=sample)
@@ -109,7 +122,7 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
             transformation=transformation,
             axis_name='vertical',
             value=y['raw_value'],
-            units='m',
+            units=y['raw_value'].attrs['units'],
             transformation_type='translation',
             vector=np.array([0, 1, 0], dtype=float),
             offset=np.zeros(3, dtype=float),
@@ -119,7 +132,7 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
             transformation=transformation,
             axis_name='rotation',
             value=rotation['raw_value'],
-            units=f['entry/sample/goniometer/chi'].attrs['units'],
+            units=rotation['raw_value'].attrs['units'],
             transformation_type='rotation',
             vector=np.array([0, 1, 0], dtype=float),
             offset=np.zeros(3, dtype=float),
@@ -129,7 +142,7 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
             transformation=transformation,
             axis_name='horizontal',
             value=x['raw_value'],
-            units='m',
+            units=x['raw_value'].attrs['units'],
             transformation_type='translation',
             vector=np.array([1, 0, 0], dtype=float),
             offset=np.zeros(3, dtype=float),

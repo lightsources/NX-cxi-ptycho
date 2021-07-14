@@ -17,7 +17,7 @@ def main():
     format to call the NXCreator.create_foo() functions in the correct order.
     """
 
-    with NXCreator('dummy.nx') as creator:
+    with NXCreator('./data/dummy.nx') as creator:
 
         entry = creator.create_entry_group(definition='NXptycho')
 
