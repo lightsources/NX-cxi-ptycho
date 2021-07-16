@@ -72,65 +72,66 @@
     	<group type="NXinstrument" name="instrument_1" minOccurs="1" maxOccurs="1">
     		<group type="NXbeam" name="beam_1" minOccurs="1" maxOccurs="1">
     			<field name="incident_beam_energy" type="NX_FLOAT" minOccurs="1" maxOccurs="1">
-    				<attribute name="units" type="NX_CHAR" optional="false"/>
 					<doc>Photon energy of the beam on entering the sample</doc>
+    				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
                 <field name="incident_beam_wavelength" type="NX_FLOAT" minOccurs="1" maxOccurs="1">
-    				<attribute name="units" type="NX_CHAR" optional="false"/>
 					<doc>Wavelength of the beam on entering the sample</doc>
+    				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
     			<field name="extent" type="NX_FLOAT" minOccurs="0" maxOccurs="1">
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
 					<doc>Lateral beam size on entering the sample</doc>
+    				<attribute name="units" type="NX_CHAR" optional="true"/>
     			</field>
     			<field name="incident_beam_divergence" type="NX_FLOAT" minOccurs="0" maxOccurs="1">
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
 					<doc>Beam divergence on entering the sample</doc>
+    				<attribute name="units" type="NX_CHAR" optional="true"/>
     			</field>
     			<field name="incident_energy_spread" type="NX_FLOAT" minOccurs="1" maxOccurs="1">
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
 					<doc>Energy spread of the beam on entering the sample</doc>
+    				<attribute name="units" type="NX_CHAR" optional="true"/>
     			</field>
 				<field name="incident_polarization" type="NX_FLOAT" minOccurs="1" maxOccurs="1">
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
 					<doc>Polarization vector of the beam on entering the sample</doc>
+    				<attribute name="units" type="NX_CHAR" optional="true"/>
     			</field>
     		</group>
     		<group type="NXdetector" name="detector_1" minOccurs="1" maxOccurs="1">
-    			<field name="data[npts_x, frame_size_x, frame_size_y]:" type="NX_INT" signal="1"
+    			<field name="data" type="NX_INT" signal="1"
 					   minOccurs="1" maxOccurs="1">
+					<doc>
+						Data values from the detector.
+
+						This data must always have shape (npts, frame_size_x, frame_size_y) regardless
+                		of the scan pattern. Use hdf5 virtual dataset to achieve this.
+					</doc>
     				<dimensions rank="3 for arbitrary scan">
     					<dim index="1" value="npts"/>
     					<dim index="2" value="frame_size_x"/>
     					<dim index="3" value="frame_size_y"/>
     				</dimensions>
-					<doc>
-						Data values from the detector.
-						This data must always have shape (npts, frame_size_x, frame_size_y) regardless
-                		of the scan pattern. Use hdf5 virtual dataset to achieve this.
-					</doc>
     			</field>
     			<link name="data" target="/NXentry/NXinstrument/NXdetector/data">
     			</link>
     			<field name="x_pixel_size" type="NX_FLOAT" units="NX_LENGTH" minOccurs="1" maxOccurs="1">
-    				<attribute name="units" type="NX_CHAR" optional="false"/>
 					<doc>Horizontal pixel size of the detector</doc>
+    				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
                 <field name="y_pixel_size" type="NX_FLOAT" units="NX_LENGTH" minOccurs="1" maxOccurs="1">
-                	<attribute name="units" type="NX_CHAR" optional="false"/>
 					<doc>Vertical pixel size of the detector</doc>
+                	<attribute name="units" type="NX_CHAR" optional="false"/>
                 </field>
     			<field name="distance" type="NX_FLOAT" units="NX_LENGTH" minOccurs="1" maxOccurs="1">
     			    <doc>The distance between the detector and the sample</doc>
     				<attribute name="units" type="NX_CHAR" optional="false"/>
                 </field>
                 <field name="beam_center_x" type="NX_FLOAT" units="NX_LENGTH" minOccurs="0" maxOccurs="1">
-                	<attribute name="units" type="NX_CHAR" optional="true"/>
 					<doc>Center of the beam on the detector in horizontal direction</doc>
+                	<attribute name="units" type="NX_CHAR" optional="true"/>
                 </field>
                 <field name="beam_center_y" type="NX_FLOAT" units="NX_LENGTH" minOccurs="0" maxOccurs="1">
-                	<attribute name="units" type="NX_CHAR" optional="true"/>
 					<doc>Center of the beam on the detector in vertical direction</doc>
+                	<attribute name="units" type="NX_CHAR" optional="true"/>
                 </field>
 
 				<group type="NXtransformation" name="transformation">
