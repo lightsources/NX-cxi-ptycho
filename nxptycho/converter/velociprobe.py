@@ -61,15 +61,15 @@ def velociprobe2nexus(master_path, position_path, nexus_path):
             # TODO: distance is redundant with transformation?
             distance=f['/entry/instrument/detector/detector_distance'][(
             )],  # meter
-            distance_units='m',
+            distance_units=f['/entry/instrument/detector/detector_distance'].
+            attrs['units'].decode('utf-8'),
             x_pixel_size=f['/entry/instrument/detector/x_pixel_size'][(
             )],  # meter
             y_pixel_size=f['/entry/instrument/detector/y_pixel_size'][(
             )],  # meter
-            pixel_size_units='m',
+            pixel_size_units=f['/entry/instrument/detector/x_pixel_size'].
+            attrs['units'].decode('utf-8'),
         )
-        # TODO: Are unit attributes? Copied from source automatically or
-        # overwritten by NXCreator?
 
         # NOTE: Create transformation function is slightly redundant because
         # there can only be one transformation per group.
