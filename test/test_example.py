@@ -1,9 +1,15 @@
+import os
+import unittest
+
 import numpy as np
 
 from nxptycho.creator import NXCreator
 
 
-def main():
+__folder__ = os.path.dirname(__file__)
+
+
+def test_creator():
     """Create a NeXus Ptycho file of random data using only required fields.
 
     NXCreator is a convenience class which does the following:
@@ -17,7 +23,7 @@ def main():
     format to call the NXCreator.create_foo() functions in the correct order.
     """
 
-    with NXCreator('./data/dummy.nx') as creator:
+    with NXCreator(f'{__folder__}/data/dummy.nx') as creator:
 
         entry = creator.create_entry_group(definition='NXptycho')
 
@@ -106,4 +112,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    unittest.main()
