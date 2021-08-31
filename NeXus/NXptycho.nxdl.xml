@@ -34,7 +34,7 @@
     </symbols>
 
     <doc>
-		Application definition for ptychography experiments.
+		Application definition for interchange of raw data from ptychography experiments.
     </doc>
 
     <group type="NXentry" name="entry_1">
