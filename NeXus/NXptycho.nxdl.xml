@@ -103,7 +103,7 @@
 						Data values from the detector.
 
 						This data must always have shape (npts, frame_size_x, frame_size_y) regardless
-                		of the scan pattern. Use hdf5 virtual dataset to achieve this.
+						of the scan pattern. Use hdf5 virtual dataset to achieve this.
 					</doc>
     				<dimensions rank="3 for arbitrary scan">
     					<dim index="1" value="npts"/>
@@ -134,7 +134,7 @@
                 	<attribute name="units" type="NX_CHAR" optional="true"/>
                 </field>
 
-				<group type="NXtransformation" name="transformation">
+				<group type="NXtransformations" name="transformation">
 					<doc>
 						Defines the location of the detector.
 					</doc>
@@ -162,7 +162,7 @@
 
 		<group type="NXsample" name="sample_1" minOccurs="1" maxOccurs="1">
 			<field name="name" type="NX_CHAR" minOccurs="0" maxOccurs="1"/>
-			<group type="NXtransformation" name="transformation">
+			<group type="NXtransformations" name="transformation">
 					<doc>
 						Defines the location of the sample.
 					</doc>
@@ -175,7 +175,6 @@
 					</field>
 				</group>
 		</group>
-
 
 	</group>
 </definition>
