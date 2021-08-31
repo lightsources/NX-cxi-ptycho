@@ -75,7 +75,7 @@
 					<doc>Photon energy of the beam on entering the sample</doc>
     				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
-                <field name="incident_beam_wavelength" type="NX_FLOAT" minOccurs="1" maxOccurs="1">
+                <field name="incident_beam_wavelength" type="NX_FLOAT" minOccurs="0" maxOccurs="1">
 					<doc>Wavelength of the beam on entering the sample</doc>
     				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
