@@ -2,7 +2,7 @@ import logging
 import sys
 import numpy as np
 import h5py
-from ..creator import NXCreator
+from nxptycho.creator import NXCreator
 
 def get_user_parameters():
     """configure user's command line parameters from sys.argv"""
