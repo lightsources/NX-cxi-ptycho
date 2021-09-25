@@ -79,6 +79,7 @@
     				<doc>
     					This is the energy of the source, not the beamline.
     				</doc>
+					<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
     			<field name="probe" type="NX_FLOAT" minOccurs="0" maxOccurs="1"/>
     			<field name="type" type="NX_CHAR" minOccurs="0" maxOccurs="1"/>
@@ -94,23 +95,23 @@
     			</field>
     			<field name="extent" type="NX_FLOAT" minOccurs="0" maxOccurs="1">
 					<doc>Lateral beam size on entering the sample</doc>
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
+    				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
     			<field name="incident_beam_divergence" type="NX_FLOAT" minOccurs="0" maxOccurs="1">
 					<doc>Beam divergence on entering the sample</doc>
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
+    				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
     			<field name="incident_energy_spread" type="NX_FLOAT" minOccurs="0" maxOccurs="1">
 					<doc>Energy spread of the beam on entering the sample</doc>
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
+    				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
 				<field name="incident_polarization" type="NX_FLOAT" minOccurs="0" maxOccurs="1">
 					<doc>Polarization vector of the beam on entering the sample</doc>
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
+    				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
 				<field name="flux" type="NX_FLOAT" minOccurs="0" maxOccurs="1">
 					<doc>Flux incident on beam plane area</doc>
-    				<attribute name="units" type="NX_CHAR" optional="true"/>
+    				<attribute name="units" type="NX_CHAR" optional="false"/>
     			</field>
     		</group>
     		<group type="NXdetector" name="detector_1" minOccurs="1" maxOccurs="1">
@@ -144,21 +145,47 @@
                 </field>
                 <field name="beam_center_x" type="NX_FLOAT" units="NX_LENGTH" minOccurs="0" maxOccurs="1">
 					<doc>Center of the beam on the detector in horizontal direction</doc>
-                	<attribute name="units" type="NX_CHAR" optional="true"/>
+                	<attribute name="units" type="NX_CHAR" optional="false"/>
                 </field>
                 <field name="beam_center_y" type="NX_FLOAT" units="NX_LENGTH" minOccurs="0" maxOccurs="1">
 					<doc>Center of the beam on the detector in vertical direction</doc>
-                	<attribute name="units" type="NX_CHAR" optional="true"/>
+                	<attribute name="units" type="NX_CHAR" optional="false"/>
                 </field>
 				<group type="NXtransformations" name="transformations">
 					<doc>
-						Defines the location of the detector.
+						Defines the location and orientation of the detector.
 					</doc>
-					<field name="axisname" type="NX_CHAR" units="NX_TRANSFORMATION">
+					<field name="axisname" type="NX_NUMBER" units="NX_TRANSFORMATION">
 						<doc>
 							The name of this field is not forced. The user is free to use any name that does not cause
 							confusion. When using more than one AXISNAME field, make sure that each field name is
 							unique in the same group, as required by HDF5.
+							The values given should be the start points of exposures for the corresponding frames.
+							The end points could be given in ``AXISNAME_end``.
+
+							See a general example here:
+							https://manual.nexusformat.org/design.html#coordinate-transformation-field-and-attributes
+
+							Example for simple ptychography experiment in translation geometry:
+								AXISNAME = "x_translation"
+									@transformation_type = "translation"
+									@vector:NX_NUMBER = 1,0,0
+									@offset:NX_NUMBER = 0,0,0
+									@offset_units = "m"
+									@depends_on = "y_translation"
+								AXISNAME = "y_translation"
+									@transformation_type = "translation"
+									@vector = 0,1,0
+									@offset = 0,0,0
+									@offset_units = "m"
+									@depends_on = "z_translation"
+								AXISNAME = "z_translation"
+									@transformation_type = "translation"
+									@vector = 0,0,1
+									@offset = 0,0,0
+									@offset_units = "m"
+									@depends_on = .
+
 						</doc>
 						<attribute name="transformation_type" type="NX_CHAR" optional="false"/>
 						<attribute name="vector" type="NX_NUMBER" optional="false"/>
