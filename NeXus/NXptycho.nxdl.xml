@@ -220,17 +220,27 @@
 		<group type="NXsample" name="sample_1" minOccurs="1" maxOccurs="1">
 			<field name="name" type="NX_CHAR" minOccurs="0" maxOccurs="1"/>
 			<group type="NXtransformations" name="transformation">
-					<doc>
-						Defines the location of the sample.
-					</doc>
-					<field name="axisname" type="NX_CHAR">
-						<attribute name="transformation_type" type="NX_CHAR" optional="false"/>
-						<attribute name="vector" type="NX_NUMBER" optional="false"/>
-						<attribute name="units" type="NX_CHAR" optional="false"/>
-						<attribute name="offset_units" type="NX_CHAR" optional="false"/>
-						<attribute name="depends_on" type="NX_CHAR" optional="false"/>
-					</field>
-				</group>
+				<doc>
+					Defines the location and orientation of the sample.
+					 <!-- TODO: set links to positioners -->
+				</doc>
+				<field name="axisname" type="NX_NUMBER" units="NX_TRANSFORMATION">
+					<attribute name="transformation_type" type="NX_CHAR" optional="false"/>
+					<attribute name="vector" type="NX_NUMBER" optional="false"/>
+					<attribute name="units" type="NX_CHAR" optional="false"/>
+					<attribute name="offset_units" type="NX_CHAR" optional="false"/>
+					<attribute name="depends_on" type="NX_CHAR" optional="false"/>
+				</field>
+			</group>
+			<group type="NXpositioner" name="positions">
+				<doc>
+					Defines the location and orientation of the sample.
+				</doc>
+				<field name="name" type="NX_NUMBER" units="NX_TRANSFORMATION"></field>
+				<field name="value" type="NX_NUMBER" units="NX_ANY"></field>
+				<field name="raw_value" type="NX_NUMBER" units="NX_ANY"></field>
+				<field name="target_value" type="NX_NUMBER" units="NX_ANY"></field>
+			</group>
 		</group>
 
 	</group>
