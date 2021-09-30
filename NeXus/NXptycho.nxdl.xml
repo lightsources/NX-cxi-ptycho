@@ -61,17 +61,17 @@
                 type was performed, e.g. basic, bragg, fourier, ...
             </doc>
         </field>
-		<field name="entry_identifier">
+		<field name="entry_identifier" minOccurs="0" maxOccurs="1">
 			<doc>
-				Unique identifier for the experiment.
+				Unique identifier for the measurement.
 			</doc>
 		</field>
     	<field name="entry_identifier_uuid" minOccurs="0" maxOccurs="1">
 			<doc>
-        		(optional) UUID identifier for this entry.
+        		UUID identifier for the measurement.
 			</doc>
     	</field>
-		<field name="entry_number" type="NX_INT">
+		<field name="entry_number" type="NX_INT" minOccurs="0" maxOccurs="1">
 			<doc>
 				Entry or scan number (must be an integer).
 				NOTE: Link to collection_identifier.
