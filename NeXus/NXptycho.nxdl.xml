@@ -30,8 +30,12 @@
     <symbols>
         <doc>
             These symbols will be used below to coordinate the shapes of the datasets.
-			<!-- TODO: are there any symbols to explain -->
 
+			npts: Number of points for arbitrary scan pattern.
+			npts_x: Number of points in the x direction
+			npts_y: Number of points in the y direction
+			frame_size_x: Number of detector pixels in x
+			frame_size_y: Number of detector pixels in y
         </doc>
     </symbols>
 
