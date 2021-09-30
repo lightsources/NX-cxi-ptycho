@@ -152,7 +152,7 @@
 						Data arrays from the detector. (i.e. the diffraction patterns)
 
 						This data must always have shape (npts, frame_size_x, frame_size_y) regardless
-						of the scan pattern. Use hdf5 virtual dataset to achieve this.
+						of the scan pattern. 
 					</doc>
     				<dimensions rank="3">
     					<dim index="1" value="npts"/>
