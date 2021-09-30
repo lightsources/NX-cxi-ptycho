@@ -147,8 +147,7 @@
     			</field>
     		</group>
     		<group type="NXdetector" name="detector_1" minOccurs="1" maxOccurs="1">
-    			<field name="data" type="NX_INT" signal="1"
-					   minOccurs="1" maxOccurs="1">
+    			<field name="data" type="NX_INT" signal="1" minOccurs="1" maxOccurs="1">
 					<doc>
 						Data arrays from the detector. (i.e. the diffraction patterns)
 
@@ -161,8 +160,6 @@
     					<dim index="3" value="frame_size_y"/>
     				</dimensions>
     			</field>
-    			<link name="data" target="/NXentry/NXinstrument/NXdetector/data">
-    			</link>
     			<field name="x_pixel_size" type="NX_FLOAT" units="NX_LENGTH" minOccurs="1" maxOccurs="1">
 					<doc>Horizontal pixel size of the detector</doc>
     				<attribute name="units" type="NX_CHAR" optional="false"/>
@@ -253,12 +250,16 @@
 
 
 		<group type="NXdata" minOccurs="1" maxOccurs="1">
-			<attribute name="signal" type="NX_CHAR" optional="false">
+			<link name="data" target="/NXentry/NXinstrument/NXdetector/data" optional="false">
 				<doc>
-					This is the plottable data.
+					Only one field/link in a NXdata group may have the signal=1 attribute.
+					This is the plottable data, e.g. a diffraction pattern or an average of diffraction patterns of
+					the scan. Choose any data that should be visualized as default in a NeXus reader.
+					If the NeXus file contains processed data (reconstructions) than the plottable data could also
+					either contain the phase or absorption of that reconstruction result as it provides a good idea
+					of the scan.
 				</doc>
-			</attribute>
-			<link name="data" target="/NXentry/NXinstrument/NXdetector/data"/>
+			</link>
 		</group>
 
 
