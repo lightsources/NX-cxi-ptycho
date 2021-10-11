@@ -88,7 +88,7 @@
     				<doc>
     					This is the energy of the source, not the beamline.
     				</doc>
-					<attribute name="units" type="NX_CHAR" optional="false"/>
+					<attribute name="units" type="NX_ENERGY" optional="false"/>
     			</field>
     			<field name="probe" type="NX_FLOAT" minOccurs="0" maxOccurs="1"/>
 					<doc>
@@ -152,7 +152,7 @@
 						Data arrays from the detector. (i.e. the diffraction patterns)
 
 						This data must always have shape (npts, frame_size_x, frame_size_y) regardless
-						of the scan pattern. 
+						of the scan pattern.
 					</doc>
     				<dimensions rank="3">
     					<dim index="1" value="npts"/>
@@ -194,7 +194,6 @@
 							https://manual.nexusformat.org/design.html#coordinate-transformation-field-and-attributes
 
 							Notes: links and "real data" act the same in HDF5
-							each axes is an HDF dataset --> using links, virtual datasets etc
 
 							More info on geometry: make sure folks are using the coordinate system correctly
 
@@ -268,16 +267,20 @@
 			<group type="NXtransformations" name="transformation">
 				<doc>
 					Defines the location and orientation of the sample.
+					The transformation is a combination of positioner data and orientation information in the
+					attributes of each axis. Generally, each physical motion controller that moves the sample or optics
+					is given its own posititioner. The movements of these controllers are combined with their relative
+					orientations into an NXtransformation.
 
 					Example for simple ptychography experiment in translation geometry:
-						"sample_x_translation" = "/entry_1/sample_1/detector_1/positioner_1"['raw_value']
+						"sample_x_translation" = "/entry_1/sample_1/positioner_1"['raw_value']
 							@transformation_type = "translation"
 							@units = 'm'
 							@vector: = 1,0,0
 							@offset: = 0,0,0
 							@offset_units = "m"
 							@depends_on = "det_y_translation"
-						"sample_y_translation" = "/entry_1/sample_1/detector_1/positioner_1"['raw_value']
+						"sample_y_translation" = "/entry_1/sample_1/positioner_2"['raw_value']
 							@transformation_type = "translation"
 							@units = 'm'
 							@vector = 0,1,0
@@ -291,7 +294,7 @@
 							@offset = 0,0,0
 							@offset_units = "m"
 							@depends_on = det_rotation
-						"sample_rotation" = "/entry_1/sample_1/detector_1/positioner_4"['value']
+						"sample_rotation" = "/entry_1/sample_1/positioner_4"['value']
 							@transformation_type = "rotation"
 							@units = 'deg'
 							@vector = 1,0,0
@@ -312,8 +315,8 @@
 
 			<group type="NXpositioner" name="positioner_1">
 				<doc>
-					A generic positioner that describes the relative sample-probe movement.
-					Add multiple positioner groups to capture all scanning motors.
+					A generic positioner that describes the relative movement of sample, probe, or detector.
+					Generally, each scanning motor has its own positioner group.
 				</doc>
 				<field name="name" type="NX_NUMBER" units="NX_TRANSFORMATION" minOccurs="1" maxOccurs="1"></field>
 				<field name="value" type="NX_NUMBER" units="NX_ANY" minOccurs="1" maxOccurs="1">
