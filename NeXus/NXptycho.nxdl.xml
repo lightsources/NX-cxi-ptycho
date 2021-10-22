@@ -181,6 +181,15 @@
 				<group type="NXtransformations" name="transformations">
 					<doc>
 						Defines the location and orientation of the detector.
+						A transformation is a combination of positioner data and orientation information in the
+						attributes of each axis. Generally, each physical positioner that moves the sample or optics
+						has its own axis in the NXtransformation group. The user if free to use any name for the axis that
+						does not confusion. For multiple axes, each axis need a unique name (within the transformation
+						group)
+
+						If a motor is not moving during the scan, e.g. only a detector positioner for alignment before
+						scanning, then it's value does not need to be linked to an actual scanning positioner but can
+						simply be a static value.
 					</doc>
 					<field name="YOUR_AXISNAME" type="NX_NUMBER" units="NX_TRANSFORMATION">
 						<doc>
@@ -190,10 +199,6 @@
 
 							See a general example here:
 							https://manual.nexusformat.org/design.html#coordinate-transformation-field-and-attributes
-
-							Notes: links and "real data" act the same in HDF5
-
-							More info on geometry: make sure folks are using the coordinate system correctly
 
 							Example for simple ptychography experiment in translation geometry:
 								"det_x_translation" = 0
@@ -265,43 +270,55 @@
 			<group type="NXtransformations" name="transformation">
 				<doc>
 					Defines the location and orientation of the sample.
-					The transformation is a combination of positioner data and orientation information in the
-					attributes of each axis. Generally, each physical motion controller that moves the sample or optics
-					is given its own posititioner. The movements of these controllers are combined with their relative
-					orientations into an NXtransformation.
+					A transformation is a combination of positioner data and orientation information in the
+					attributes of each axis. Generally, each physical positioner that moves the sample or optics
+					has its own axis in the NXtransformation group. The user if free to use any name for the axis that
+					does not confusion. For multiple axes, each axis need a unique name (within the transformation
+					group)
 
-					Example for simple ptychography experiment in translation geometry:
-						"sample_x_translation" = "/entry_1/sample_1/positioner_1"['raw_value']
-							@transformation_type = "translation"
-							@units = 'm'
-							@vector: = 1,0,0
-							@offset: = 0,0,0
-							@offset_units = "m"
-							@depends_on = "det_y_translation"
-						"sample_y_translation" = "/entry_1/sample_1/positioner_2"['raw_value']
-							@transformation_type = "translation"
-							@units = 'm'
-							@vector = 0,1,0
-							@offset = 0,0,0
-							@offset_units = "m"
-							@depends_on = "det_z_translation"
-						"sample_z_translation" = 0
-							@transformation_type = "translation"
-							@units = 'm'
-							@vector = 0,0,1
-							@offset = 0,0,0
-							@offset_units = "m"
-							@depends_on = det_rotation
-						"sample_rotation" = "/entry_1/sample_1/positioner_4"['value']
-							@transformation_type = "rotation"
-							@units = 'deg'
-							@vector = 1,0,0
-							@offset = 0,0,0
-							@offset_units = "deg"
-							@depends_on = .
+					If a motor is not moving during the scan, e.g. only a coarse sample positioner for alignment before
+					scanning, then it's value does not need to be linked to an actual scanning positioner but can
+					simply be a static value.
 				</doc>
 				<field name="YOUR_AXISNAME" type="NX_NUMBER" units="NX_TRANSFORMATION"></field>
-				<!-- FIXME: how to clarify that either YOUR_AXISNAME value is a value or a link to e.g. a positioner value -->
+					<doc>
+						The name of this field is not forced. You are free to use any name that does not cause
+						confusion. When using more than one YOUR_AXISNAME field, make sure that each field name is
+						unique in the same group, as required by HDF5.
+
+						See a general example here:
+						https://manual.nexusformat.org/design.html#coordinate-transformation-field-and-attributes
+
+						Example for simple ptychography experiment in translation geometry:
+							"sample_x_translation" = "/entry_1/sample_1/positioner_1"['raw_value']
+								@transformation_type = "translation"
+								@units = 'm'
+								@vector: = 1,0,0
+								@offset: = 0,0,0
+								@offset_units = "m"
+								@depends_on = "det_y_translation"
+							"sample_y_translation" = "/entry_1/sample_1/positioner_2"['raw_value']
+								@transformation_type = "translation"
+								@units = 'm'
+								@vector = 0,1,0
+								@offset = 0,0,0
+								@offset_units = "m"
+								@depends_on = "det_z_translation"
+							"sample_z_translation" = 0
+								@transformation_type = "translation"
+								@units = 'm'
+								@vector = 0,0,1
+								@offset = 0,0,0
+								@offset_units = "m"
+								@depends_on = det_rotation
+							"sample_rotation" = "/entry_1/sample_1/positioner_4"['value']
+								@transformation_type = "rotation"
+								@units = 'deg'
+								@vector = 1,0,0
+								@offset = 0,0,0
+								@offset_units = "deg"
+								@depends_on = .
+					</doc>
 				<link name="YOUR_AXISNAME" target="/entry_1/sample_1/detector_1/positioner_1['value']">
 					<attribute name="transformation_type" type="NX_CHAR" optional="false"/>
 					<attribute name="vector" type="NX_NUMBER" optional="false"/>
@@ -315,6 +332,7 @@
 				<doc>
 					A generic positioner that describes the relative movement of sample, probe, or detector.
 					Generally, each scanning motor has its own positioner group.
+					Values can be linked to the respective axis in the NXtransformation group.
 				</doc>
 				<field name="name" type="NX_NUMBER" units="NX_TRANSFORMATION" minOccurs="1" maxOccurs="1"></field>
 				<field name="value" type="NX_NUMBER" units="NX_ANY" minOccurs="1" maxOccurs="1">
