@@ -68,3 +68,5 @@ nosetests.xml
 example*.nx
 .idea
 .DS_Store
+
+testdata/

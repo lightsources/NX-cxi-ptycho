@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="nxdlformat.xsl" ?>
+<!--
+  # NeXus - Neutron and X-ray Common Data Format
+  #
+  # Copyright (C) 2014-2021 NeXus International Advisory Committee (NIAC)
+  #
+  # This library is free software; you can redistribute it and/or
+  # modify it under the terms of the GNU Lesser General Public
+  # License as published by the Free Software Foundation; either
+  # version 3 of the License, or (at your option) any later version.
+  #
+  # This library is distributed in the hope that it will be useful,
+  # but WITHOUT ANY WARRANTY; without even the implied warranty of
+  # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  # Lesser General Public License for more details.
+  #
+  # You should have received a copy of the GNU Lesser General Public
+  # License along with this library; if not, write to the Free Software
+  # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  #
+  # For further information, see http://www.nexusformat.org
+-->
+<definition name="NXptycho" extends="NXobject" type="group"
+			category="application"
+			xmlns="http://definition.nexusformat.org/nxdl/3.1"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    		xsi:schemaLocation="http://definition.nexusformat.org/nxdl/3.1 ../nxdl.xsd"
+    >
+    <symbols>
+        <doc>
+            These symbols will be used below to coordinate the shapes of the datasets.
+
+			npts: Number of points for arbitrary scan pattern
+			frame_size_x: Number of detector pixels in x
+			frame_size_y: Number of detector pixels in y
+        </doc>
+    </symbols>
+
+    <doc>
+		Application definition for interchange of data from ptychography experiments.
+    </doc>
+
+    <group type="NXentry" name="entry_1">
+    	<field name="definition" type="NX_CHAR" minOccurs="1" maxOccurs="1">
+    		<doc>
+                Official NeXus NXDL schema to which this file conforms
+            </doc>
+    		<enumeration>
+    			<item value="NXptycho"/>
+    		</enumeration>
+		</field>
+		<field name="title" minOccurs="0" maxOccurs="1"/>
+    	<field name="start_time" type="NX_DATE_TIME" minOccurs="0" maxOccurs="1"/>
+    	<field name="end_time" type="NX_DATE_TIME" minOccurs="0" maxOccurs="1"/>
+        <field name="experiment_description" type="NX_CHAR" minOccurs="0" maxOccurs="1">
+            <doc>
+                Brief summary of the experiment, including key objectives. String to define which ptychography
+                type was performed, e.g. basic, bragg, fourier, ...
+            </doc>
+        </field>
+		<field name="entry_identifier" minOccurs="0" maxOccurs="1">
+			<doc>
+				Unique identifier for the measurement.
+			</doc>
+		</field>
+    	<field name="entry_identifier_uuid" minOccurs="0" maxOccurs="1">
+			<doc>
+        		UUID identifier for the measurement.
+			</doc>
+    	</field>
+		<field name="entry_number" type="NX_INT" minOccurs="0" maxOccurs="1">
+			<doc>
+				Entry or scan number (must be an integer).
+				NOTE: Link to collection_identifier.
+			</doc>
+		</field>
+
+    	<group type="NXinstrument" name="instrument_1" minOccurs="1" maxOccurs="1">
+			<group type="NXsource" name="source_1" minOccurs="0" maxOccurs="1" >
+    			<field name="name" type="NX_CHAR" minOccurs="0" maxOccurs="1"/>
+					<doc>
+    					Name of the source, e.g. a synchrotron light source or other facility
+    				</doc>
+    			<field name="energy" type="NX_FLOAT" units="NX_ENERGY" minOccurs="0" maxOccurs="1">
+    				<doc>
+    					This is the energy of the source, not the beamline.
+    				</doc>
+    			</field>
+    			<field name="probe" type="NX_CHAR" minOccurs="0" maxOccurs="1"/>
+					<doc>
+						Type of radiation probe. Pick one from the enumerated list and spell exactly.
+						For ptychography most likely one of these:
+						<enumeration>
+							<item value="x-ray" />
+							<item value="electron" />
+							<item value="visible light" />
+							<item value="ultraviolet" />
+						</enumeration>
+						See full list under NXsource base class definition.
+					</doc>
+    			<field name="type" type="NX_CHAR" minOccurs="0" maxOccurs="1"/>
+					<doc>type of radiation source. Pick one from the enumerated list and spell exactly.
+						For ptychography most likely one of these:
+						<enumeration>
+							<item value="Synchrotron X-ray Source" />
+							<item value="Rotating Anode X-ray" />
+							<item value="Fixed Tube X-ray" />
+							<item value="UV Laser" />
+							<item value="Free-Electron Laser" />
+							<item value="Optical Laser" />
+						</enumeration>
+						See full list under NXsource base class definition.
+					</doc>
+    		</group>
+    		<group type="NXbeam" name="beam_1" minOccurs="1" maxOccurs="1">
+    			<field name="incident_energy" type="NX_FLOAT" units="NX_ENERGY" minOccurs="1" maxOccurs="1">
+					<doc>Photon energy of the beam on entering the sample</doc>
+    			</field>
+                <field name="incident_wavelength" type="NX_FLOAT" units="NX_WAVELENGTH" minOccurs="0" maxOccurs="1">
+					<doc>Wavelength of the beam on entering the sample</doc>
+    			</field>
+    			<field name="extent" type="NX_FLOAT" units="NX_LENGTH" minOccurs="0" maxOccurs="1">
+					<doc>Lateral beam size on entering the sample</doc>
+    			</field>
+    			<field name="incident_beam_divergence" type="NX_FLOAT" units="NX_LENGTH" minOccurs="0" maxOccurs="1">
+					<doc>Beam divergence on entering the sample</doc>
+    			</field>
+    			<field name="incident_energy_spread" type="NX_FLOAT" units="NX_LENGTH" minOccurs="0" maxOccurs="1">
+					<doc>Energy spread of the beam on entering the sample</doc>
+    			</field>
+				<field name="incident_polarization" type="NX_FLOAT" units="NX_CHAR" minOccurs="0" maxOccurs="1">
+					<!-- TODO what polarizations are possible, what about mixtures?-->
+					<doc>Polarization vector of the beam on entering the sample should be on of the following:
+						<enumeration>
+							<item value="circular" />
+							<item value="horizontal" />
+							<item value="vertical" />
+						</enumeration>
+					</doc>
+    			</field>
+				<field name="flux" type="NX_FLOAT" units="NX_FLUX" minOccurs="0" maxOccurs="1">
+					<doc>Flux incident on beam plane area</doc>
+    			</field>
+    		</group>
+    		<group type="NXdetector" name="detector_1" minOccurs="1" maxOccurs="1">
+    			<field name="data" type="NX_INT" signal="1" minOccurs="1" maxOccurs="1">
+					<doc>
+						Data arrays from the detector. (i.e. the diffraction patterns)
+
+						This data must always have shape (npts, frame_size_x, frame_size_y) regardless
+						of the scan pattern.
+					</doc>
+    				<dimensions rank="3">
+    					<dim index="1" value="npts"/>
+    					<dim index="2" value="frame_size_x"/>
+    					<dim index="3" value="frame_size_y"/>
+    				</dimensions>
+    			</field>
+    			<field name="x_pixel_size" type="NX_FLOAT" units="NX_LENGTH" minOccurs="1" maxOccurs="1">
+					<doc>Horizontal pixel size of the detector</doc>
+    			</field>
+                <field name="y_pixel_size" type="NX_FLOAT" units="NX_LENGTH" minOccurs="1" maxOccurs="1">
+					<doc>Vertical pixel size of the detector</doc>
+                </field>
+    			<field name="distance" type="NX_FLOAT" units="NX_LENGTH" minOccurs="1" maxOccurs="1">
+    			    <doc>The distance between the detector and the sample</doc>
+                </field>
+				<!-- TODO what unit for beam center? px? m?-->
+                <field name="beam_center_x" type="NX_FLOAT" units="NX_ANY" minOccurs="0" maxOccurs="1">
+					<doc>Center of the beam on the detector in horizontal direction</doc>
+                </field>
+                <field name="beam_center_y" type="NX_FLOAT" units="NX_ANY" minOccurs="0" maxOccurs="1">
+					<doc>Center of the beam on the detector in vertical direction</doc>
+                </field>
+				<group type="NXtransformations" name="transformations">
+					<doc>
+						Defines the location and orientation of the detector.
+						A transformation is a combination of positioner data and orientation information in the
+						attributes of each axis. Generally, each physical positioner that moves the sample or optics
+						has its own axis in the NXtransformation group. The user if free to use any name for the axis that
+						does not confusion. For multiple axes, each axis need a unique name (within the transformation
+						group)
+
+						If a motor is not moving during the scan, e.g. only a detector positioner for alignment before
+						scanning, then it's value does not need to be linked to an actual scanning positioner but can
+						simply be a static value.
+					</doc>
+					<field name="YOUR_AXISNAME" type="NX_NUMBER" units="NX_TRANSFORMATION">
+						<doc>
+							The name of this field is not forced. You are free to use any name that does not cause
+							confusion. When using more than one YOUR_AXISNAME field, make sure that each field name is
+							unique in the same group, as required by HDF5.
+
+							See a general example here:
+							https://manual.nexusformat.org/design.html#coordinate-transformation-field-and-attributes
+
+							Example for simple ptychography experiment in translation geometry:
+								"det_x_translation" = 0
+									@transformation_type = "translation"
+									@units = 'm'
+									@vector: = 1,0,0
+									@offset: = 0,0,0
+									@offset_units = "m"
+									@depends_on = "det_y_translation"
+								"det_y_translation" = 15
+									@transformation_type = "translation"
+									@units = 'm'
+									@vector = 0,1,0
+									@offset = 0,0,0
+									@offset_units = "m"
+									@depends_on = "det_z_translation"
+								"det_z_translation" = "/entry_1/instrument_1/detector_1/distance"
+									@transformation_type = "translation"
+									@units = 'm'
+									@vector = 0,0,1
+									@offset = 0,0,0
+									@offset_units = "m"
+									@depends_on = det_rotation
+								"det_rotation" = 0
+									@transformation_type = "rotation"
+									@units = 'deg'
+									@vector = 1,0,0
+									@offset = 0,0,0
+									@offset_units = "deg"
+									@depends_on = .
+						</doc>
+						<attribute name="transformation_type" type="NX_CHAR" optional="false"/>
+						<attribute name="units" type="NX_CHAR" optional="false"/>
+						<attribute name="vector" type="NX_NUMBER" optional="false"/>
+						<attribute name="offset" type="NX_NUMBER" optional="false"/>
+						<attribute name="offset_units" type="NX_CHAR" optional="false"/>
+						<attribute name="depends_on" type="NX_CHAR" optional="false"/>
+					</field>
+				</group>
+
+			<group type="NXmonitor" minOccurs="0" maxOccurs="1">
+				<field name="data" type="NX_FLOAT">
+					<doc>
+						<!-- TODO -->
+					</doc>
+				    <dimensions rank="1 for arbitrary scan, 2 for raster">
+    					<dim index="1" value="npts_x"/>
+    					<dim index="2" value="npts_y"/>
+    				</dimensions>
+				</field>
+			</group>
+    		</group>
+		</group>
+
+
+		<group type="NXdata" minOccurs="1" maxOccurs="1">
+			<link name="data" target="/NXentry/NXinstrument/NXdetector/data" optional="false">
+				<doc>
+					Only one field/link in a NXdata group may have the signal=1 attribute.
+					This is the plottable data, e.g. a diffraction pattern or an average of diffraction patterns of
+					the scan. Choose any data that should be visualized as default in a NeXus reader.
+					If the NeXus file contains processed data (reconstructions) than the plottable data could also
+					either contain the phase or absorption of that reconstruction result as it provides a good idea
+					of the scan.
+				</doc>
+			</link>
+		</group>
+
+
+		<group type="NXsample" name="sample_1" minOccurs="1" maxOccurs="1">
+			<field name="name" type="NX_CHAR" minOccurs="0" maxOccurs="1"/>
+			<group type="NXtransformations" name="transformation">
+				<doc>
+					Defines the location and orientation of the sample.
+					A transformation is a combination of positioner data and orientation information in the
+					attributes of each axis. Generally, each physical positioner that moves the sample or optics
+					has its own axis in the NXtransformation group. The user if free to use any name for the axis that
+					does not confusion. For multiple axes, each axis need a unique name (within the transformation
+					group)
+
+					If a motor is not moving during the scan, e.g. only a coarse sample positioner for alignment before
+					scanning, then it's value does not need to be linked to an actual scanning positioner but can
+					simply be a static value.
+				</doc>
+				<field name="YOUR_AXISNAME" type="NX_NUMBER" units="NX_TRANSFORMATION"></field>
+					<doc>
+						The name of this field is not forced. You are free to use any name that does not cause
+						confusion. When using more than one YOUR_AXISNAME field, make sure that each field name is
+						unique in the same group, as required by HDF5.
+
+						See a general example here:
+						https://manual.nexusformat.org/design.html#coordinate-transformation-field-and-attributes
+
+						Example for simple ptychography experiment in translation geometry:
+							"sample_x_translation" = "/entry_1/sample_1/positioner_1"['raw_value']
+								@transformation_type = "translation"
+								@units = 'm'
+								@vector: = 1,0,0
+								@offset: = 0,0,0
+								@offset_units = "m"
+								@depends_on = "det_y_translation"
+							"sample_y_translation" = "/entry_1/sample_1/positioner_2"['raw_value']
+								@transformation_type = "translation"
+								@units = 'm'
+								@vector = 0,1,0
+								@offset = 0,0,0
+								@offset_units = "m"
+								@depends_on = "det_z_translation"
+							"sample_z_translation" = 0
+								@transformation_type = "translation"
+								@units = 'm'
+								@vector = 0,0,1
+								@offset = 0,0,0
+								@offset_units = "m"
+								@depends_on = det_rotation
+							"sample_rotation" = "/entry_1/sample_1/positioner_4"['value']
+								@transformation_type = "rotation"
+								@units = 'deg'
+								@vector = 1,0,0
+								@offset = 0,0,0
+								@offset_units = "deg"
+								@depends_on = .
+					</doc>
+				<link name="YOUR_AXISNAME" target="/entry_1/sample_1/detector_1/positioner_1['value']">
+					<attribute name="transformation_type" type="NX_CHAR" optional="false"/>
+					<attribute name="vector" type="NX_NUMBER" optional="false"/>
+					<attribute name="units" type="NX_CHAR" optional="false"/>
+					<attribute name="offset_units" type="NX_CHAR" optional="false"/>
+					<attribute name="depends_on" type="NX_CHAR" optional="false"/>
+				</link>
+			</group>
+
+			<group type="NXpositioner" name="positioner_1">
+				<doc>
+					A generic positioner that describes the relative movement of sample, probe, or detector.
+					Generally, each scanning motor has its own positioner group.
+					Values can be linked to the respective axis in the NXtransformation group.
+				</doc>
+				<field name="name" type="NX_NUMBER" units="NX_TRANSFORMATION" minOccurs="1" maxOccurs="1"></field>
+				<field name="value" type="NX_NUMBER" units="NX_ANY" minOccurs="1" maxOccurs="1">
+					<doc>
+						Best known value of positioner
+					</doc>
+					<attribute name="units" type="NX_CHAR" optional="false"/>
+				</field>
+				<field name="raw_value" type="NX_NUMBER" units="NX_ANY" minOccurs="0" maxOccurs="1">
+					<doc>
+					Raw value of positioner
+					</doc>
+					<attribute name="units" type="NX_CHAR" optional="false"/>
+				</field>
+				<field name="target_value" type="NX_NUMBER" units="NX_ANY" minOccurs="0" maxOccurs="1">
+					<doc>
+						Targeted (commanded) value of positioner
+					</doc>
+					<attribute name="units" type="NX_CHAR" optional="false"/>
+				</field>
+				<field name="velocity" type="NX_NUMBER" units="NX_ANY" minOccurs="0" maxOccurs="1">
+					<doc>
+						Velocity of the positioner (distance moved per unit time)
+					</doc>
+					<attribute name="units" type="NX_CHAR" optional="false"/>
+				</field>
+			</group>
+		</group>
+
+	</group>
+</definition>
