@@ -236,6 +236,9 @@
 
 			<group type="NXmonitor" minOccurs="0" maxOccurs="1">
 				<field name="data" type="NX_FLOAT">
+					<doc>
+						<!-- TODO -->
+					</doc>
 				    <dimensions rank="1 for arbitrary scan, 2 for raster">
     					<dim index="1" value="npts_x"/>
     					<dim index="2" value="npts_y"/>
